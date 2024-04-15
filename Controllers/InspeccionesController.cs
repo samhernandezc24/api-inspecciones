@@ -32,11 +32,14 @@ namespace API.Inspecciones.Controllers
             try
             {
                 List<dynamic> lstInspeccionesTipos  = await _inspeccionesTiposService.List();
-                List<dynamic> lstUnidades           = await _unidadesService.List();
+                List<dynamic> lstUnidadesTemporales = await _unidadesService.List();
+
+                var lstUnidades = await HttpReq.Post("unidades", "unidades/PredictiveEOS");
 
                 objReturn.Result = new
                 {
                     InspeccionesTipos   = lstInspeccionesTipos,
+                    UnidadesTemporales  = lstUnidadesTemporales,
                     Unidades            = lstUnidades,
                 };
 

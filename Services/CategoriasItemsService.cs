@@ -33,7 +33,7 @@ namespace API.Inspecciones.Services
             // GUARDAR CATEGORÍA ITEM
             CategoriaItem objModel = new CategoriaItem();
             objModel.IdCategoriaItem        = Guid.NewGuid().ToString();
-            objModel.Name                   = Globals.ToString(data.name);
+            objModel.Name                   = "Pregunta";
             objModel.IdInspeccionTipo       = Globals.ParseGuid(data.idInspeccionTipo);
             objModel.InspeccionTipoName     = Globals.ToUpper(data.inspeccionTipoName);
             objModel.IdCategoria            = Globals.ParseGuid(data.idCategoria);
@@ -41,7 +41,7 @@ namespace API.Inspecciones.Services
             objModel.Orden                  = categoriaItemNuevoOrden;
             objModel.IdFormularioTipo       = "ea52bdfd-8af6-4f5a-b182-2b99e554eb32";
             objModel.FormularioTipoName     = "Opción múltiple";
-            objModel.FormularioValor        = "Opción 1";
+            objModel.FormularioValor        = "Sí,No";
             objModel.NoAplica               = false;
             objModel.SetCreated(Globals.GetUser(user));
 
@@ -117,11 +117,12 @@ namespace API.Inspecciones.Services
                             {
                                 IdCategoriaItem     = x.IdCategoriaItem,
                                 Name                = x.Name,
+                                IdCategoria         = x.IdCategoria,
+                                CategoriaName       = x.CategoriaName,
                                 Orden               = x.Orden,
                                 IdFormularioTipo    = string.IsNullOrEmpty(x.IdFormularioTipo) ? "" : x.IdFormularioTipo,
                                 FormularioTipoName  = x.FormularioTipoName,
                                 FormularioValor     = x.FormularioValor,
-                                Edit                = false,
                             })
                             .ToListAsync<dynamic>();
         }
@@ -136,28 +137,19 @@ namespace API.Inspecciones.Services
             var objTransaction = _context.Database.BeginTransaction();
 
             string idCategoriaItem      = Globals.ParseGuid(data.idCategoriaItem);
-            string categoriaItemName    = Globals.ToString(data.name);
 
             // ENCONTRAR UNA CATEGORÍA ITEM PARA ACTUALIZAR
             CategoriaItem objModel = await Find(idCategoriaItem);
 
             if (objModel == null) { throw new ArgumentException("No se ha encontrado la pregunta solicitada."); }
-            if (objModel.Deleted) { throw new ArgumentException("La pregunta ya fue eliminada anteriormente."); }
-
-            bool isNameModified = !string.Equals(objModel.Name, categoriaItemName, StringComparison.OrdinalIgnoreCase);
-
-            if (isNameModified)
-            {
-                bool findCategoriaItemName = await _context.CategoriasItems.AnyAsync(x => x.Name.ToString() == categoriaItemName && x.IdCategoriaItem != idCategoriaItem && !x.Deleted);
-                if (findCategoriaItemName) { throw new ArgumentException("Ya existe una pregunta con la misma interrogante."); }
-            }                        
+            if (objModel.Deleted) { throw new ArgumentException("La pregunta ya fue eliminada anteriormente."); }                     
 
             // ACTUALIZAR CATEGORÍA ITEM         
-            objModel.Name               = categoriaItemName;
-            objModel.IdFormularioTipo   = Globals.ParseGuid(data.idFormularioTipo);
-            objModel.FormularioTipoName = Globals.ToString(data.formularioTipoName);
-            objModel.FormularioValor    = "";
-            objModel.NoAplica           = false;
+            objModel.Name                   = Globals.ToString(data.name);
+            objModel.IdFormularioTipo       = Globals.ParseGuid(data.idFormularioTipo);
+            objModel.FormularioTipoName     = Globals.ToString(data.formularioTipoName);
+            objModel.FormularioValor        = Globals.ToString(data.formularioValor);
+            objModel.NoAplica               = false;
             objModel.SetUpdated(Globals.GetUser(user));
 
             _context.CategoriasItems.Update(objModel);
