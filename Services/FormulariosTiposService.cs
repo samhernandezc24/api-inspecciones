@@ -1,4 +1,4 @@
-﻿﻿using API.Inspecciones.Persistence;
+using API.Inspecciones.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Inspecciones.Services
@@ -11,11 +11,11 @@ namespace API.Inspecciones.Services
         {
             _context    = context;
         }
-        
+
         public async Task<List<dynamic>> List()
         {
             return await _context.FormulariosTipos
-                                 .AsNoTracking() 
+                                 .AsNoTracking()
                                  .Where(x => !x.Deleted)
                                  .OrderBy(x => x.Orden)
                                  .Select(x => new

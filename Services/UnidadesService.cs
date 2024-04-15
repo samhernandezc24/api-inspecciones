@@ -118,8 +118,8 @@ namespace API.Inspecciones.Services
             {
                 {"IdCreatedUser",   (strValue) => item => item.IdCreatedUser    == strValue},
                 {"IdUpdatedUser",   (strValue) => item => item.IdUpdatedUser    == strValue},
-            }; 
-            
+            };
+
             // FILTROS MULTIPLE
             var filtersMultiple = new Dictionary<string, Func<string, Expression<Func<Unidad, bool>>>>
             {
@@ -193,7 +193,7 @@ namespace API.Inspecciones.Services
                 .Select(Globals.BuildSelector<Unidad, Unidad>(strColumns))
                 .ProjectTo<UnidadViewModel>(_mapper.ConfigurationProvider);
 
-            return lstItems;                        
+            return lstItems;
         }
 
         public Task Delete(dynamic data, ClaimsPrincipal user)
@@ -285,7 +285,7 @@ namespace API.Inspecciones.Services
                 .Where(x => !x.Deleted)
                 .Select(Globals.BuildSelector<Unidad, Unidad>(fields));
 
-            // INITIALIZATION            
+            // INITIALIZATION
             DataSourceBuilder<Unidad> objDataSourceBuilder = new DataSourceBuilder<Unidad>();
             objDataSourceBuilder.Source     = lstItems;
             objDataSourceBuilder.Arguments  = data;

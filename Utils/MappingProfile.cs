@@ -7,7 +7,7 @@ namespace API.Inspecciones.Utils
 {
     public class MappingProfile : Profile
     {
-        public MappingProfile() 
+        public MappingProfile()
         {
             // MAPPING PARA RETORNO DE DATASOURCE_EXPRESSION
             // U

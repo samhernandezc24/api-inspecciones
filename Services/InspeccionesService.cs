@@ -13,7 +13,7 @@ namespace API.Inspecciones.Services
 
         public InspeccionesService(Context context)
         {
-            _context = context;            
+            _context = context;
         }
 
         public async Task Cancel(dynamic data, ClaimsPrincipal user)
@@ -45,7 +45,7 @@ namespace API.Inspecciones.Services
             objModel.IdInspeccion                   = Guid.NewGuid().ToString();
             objModel.Fecha                          = Globals.DateTime(data.fecha);
             objModel.IdBase                         = Globals.ParseGuid(data.idBase);
-            objModel.BaseName                       = Globals.ToUpper(data.baseName);            
+            objModel.BaseName                       = Globals.ToUpper(data.baseName);
             objModel.IdInspeccionEstatus            = "ea52bdfd-8af6-4f5a-b182-2b99e554eb31";
             objModel.InspeccionEstatusName          = "EVALUACIÓN";
             objModel.IdInspeccionTipo               = Globals.ParseGuid(data.idInspeccionTipo);
@@ -97,7 +97,7 @@ namespace API.Inspecciones.Services
             objModel.IdInspeccion                   = Guid.NewGuid().ToString();
             objModel.Fecha                          = Globals.DateTime(data.fecha);
             objModel.IdBase                         = Globals.ParseGuid(data.idBase);
-            objModel.BaseName                       = Globals.ToUpper(data.baseName);            
+            objModel.BaseName                       = Globals.ToUpper(data.baseName);
             objModel.IdInspeccionEstatus            = "ea52bdfd-8af6-4f5a-b182-2b99e554eb31";
             objModel.InspeccionEstatusName          = "EVALUACIÓN";
             objModel.IdInspeccionTipo               = Globals.ParseGuid(data.idInspeccionTipo);

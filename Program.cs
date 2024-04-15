@@ -1,4 +1,4 @@
-﻿using API.Inspecciones.Persistence;
+using API.Inspecciones.Persistence;
 using API.Inspecciones.Services;
 using API.Inspecciones.Utils;
 using AutoMapper;
@@ -45,7 +45,7 @@ var cultureInfo = new CultureInfo("es-MX");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
-// Configurar la pol�tica CORS para permitir solicitudes desde cualquier origen.
+// Configurar la politica CORS para permitir solicitudes desde cualquier origen.
 app.UseCors(x => x.AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed(origin => true).AllowCredentials());
 
 // Configurar el canal de peticiones HTTP.

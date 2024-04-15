@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Workcube.Generic;
 using Workcube.Libraries;
 
@@ -9,7 +9,7 @@ namespace API.Inspecciones.Models
         [Key]
         public string IdInspeccionCategoriaItem { get; set; }
         public string Name { get; set; }
-        
+
         // INSPECCION
         public virtual Inspeccion Inspeccion { get; set; }
         public string IdInspeccion { get; set; }
@@ -30,7 +30,7 @@ namespace API.Inspecciones.Models
 
         public dynamic ValueDynamic => IdFormularioTipo == "ea52bdfd-8af6-4f5a-b182-2b99e554eb34" ? Globals.ParseBool(Value) : Value;
 
-        public string ValueReporte { get 
+        public string ValueReporte { get
             {
                 string value = Value;
 
@@ -53,7 +53,7 @@ namespace API.Inspecciones.Models
                         break;
                 }
 
-                return value;            
+                return value;
             }
         }
 

@@ -16,7 +16,7 @@ namespace API.Inspecciones.Models
         // BASE
         public string IdBase { get; set; }
         public string BaseName { get; set; }
-        
+
         // INSPECCION ESTATUS
         public virtual InspeccionEstatus InspeccionEstatus { get; set; }
         public string IdInspeccionEstatus { get; set; }
@@ -27,7 +27,7 @@ namespace API.Inspecciones.Models
         public string IdInspeccionTipo { get; set; }
         public string InspeccionTipoCodigo { get; set; }
         public string InspeccionTipoName { get; set; }
-        
+
         // INSPECCION INICIAL
         public DateTime? FechaInspeccionInicial { get; set; }
         public string FechaInspeccionInicialNatural => FechaInspeccionInicial.HasValue ? FechaInspeccionInicial.Value.ToString("dd DE MMMM DE yyyy A LAS hh:mm tt").ToUpper() : "NA";
@@ -60,7 +60,7 @@ namespace API.Inspecciones.Models
         // UNIDAD PLACA TIPO
         public string IdUnidadPlacaTipo { get; set; }
         public string UnidadPlacaTipoName { get; set; }
-        
+
         public string Placa { get; set; }
         public string NumeroSerie { get; set; }
         public string Modelo { get; set; }

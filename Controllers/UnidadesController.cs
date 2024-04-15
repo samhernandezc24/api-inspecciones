@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Nodes;
+using System.Text.Json.Nodes;
 using API.Inspecciones.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +23,7 @@ namespace API.Inspecciones.Controllers
             JsonReturn objReturn = new JsonReturn();
 
             try
-            {                
+            {
                 List<dynamic> lstUsuarios   = await _unidadesService.ListUsuarios();
                 var lstUnidadesMarcas       = await HttpReq.Post("unidades", "unidadesMarcas/List");
                 var lstUnidadesTipos        = await HttpReq.Post("unidades", "unidades/tipos/List");
