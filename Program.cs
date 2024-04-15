@@ -19,6 +19,8 @@ builder.Services.AddDbContext<Context>(opt => opt.UseSqlServer(builder.Configura
 builder.Services.AddScoped<CategoriasService, CategoriasService>();
 builder.Services.AddScoped<CategoriasItemsService, CategoriasItemsService>();
 builder.Services.AddScoped<FormulariosTiposService, FormulariosTiposService>();
+builder.Services.AddScoped<InspeccionesFicherosService, InspeccionesFicherosService>();
+builder.Services.AddScoped<InspeccionesService, InspeccionesService>();
 builder.Services.AddScoped<InspeccionesTiposService, InspeccionesTiposService>();
 builder.Services.AddScoped<UnidadesService, UnidadesService>();
 

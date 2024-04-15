@@ -1,11 +1,12 @@
 ﻿using System.Security.Claims;
 using API.Inspecciones.Models;
 using API.Inspecciones.Persistence;
+using Workcube.Interfaces;
 using Workcube.Libraries;
 
 namespace API.Inspecciones.Services
 {
-    public class InspeccionesFicherosService
+    public class InspeccionesFicherosService : IGlobal<InspeccionFichero>
     {
         private readonly Context _context;
         private readonly IWebHostEnvironment _root;
@@ -26,6 +27,7 @@ namespace API.Inspecciones.Services
 
             // GUARDAR FOTOGRAFÍAS DE INSPECCIÓN
             InspeccionFichero objModel = new InspeccionFichero();
+
             objModel.IdInspeccionFichero    = Guid.NewGuid().ToString();
             objModel.IdInspeccion           = Globals.ParseGuid(data.idInspeccion);
             objModel.InspeccionFolio        = Globals.ToUpper(data.inspeccionFolio);
@@ -44,6 +46,41 @@ namespace API.Inspecciones.Services
             await FileManager.SaveFileBase64(fileBase64, directory + objModel.Path);
 
             objTransaction.Commit();
+        }
+
+        public Task<dynamic> DataSource(dynamic data, ClaimsPrincipal user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Delete(dynamic data, ClaimsPrincipal user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<InspeccionFichero> Find(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<InspeccionFichero> FindSelectorById(string id, string fields)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<dynamic>> List()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<byte[]> Reporte(dynamic data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Update(dynamic data, ClaimsPrincipal user)
+        {
+            throw new NotImplementedException();
         }
     }
 }
