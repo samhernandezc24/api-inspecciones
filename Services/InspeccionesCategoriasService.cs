@@ -1,5 +1,4 @@
-﻿using API.Inspecciones.Interfaces;
-using API.Inspecciones.Models;
+﻿using API.Inspecciones.Models;
 using API.Inspecciones.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -8,7 +7,7 @@ using Workcube.Libraries;
 
 namespace API.Inspecciones.Services
 {
-    public class InspeccionesCategoriasService : IInspeccionesCategoriasService
+    public class InspeccionesCategoriasService : IGlobal<InspeccionCategoria>
     {
         private readonly Context _context;
 
@@ -31,7 +30,7 @@ namespace API.Inspecciones.Services
             objModel.Name                   = Globals.ToString(data.name);
             objModel.IdInspeccion           = Globals.ParseGuid(data.idInspeccion);
             objModel.InspeccionFolio        = Globals.ToString(data.inspeccionFolio);
-            objModel.InspeccionName         = Globals.ToString(data.inspeccionName);
+            //objModel.InspeccionName         = Globals.ToString(data.inspeccionName);
             objModel.SetCreated(objUser);
 
             _context.InspeccionesCategorias.Add(objModel);

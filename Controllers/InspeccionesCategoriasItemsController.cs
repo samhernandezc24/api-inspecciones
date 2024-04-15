@@ -1,5 +1,4 @@
-﻿using API.Inspecciones.Interfaces;
-using API.Inspecciones.Services;
+﻿using API.Inspecciones.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Nodes;

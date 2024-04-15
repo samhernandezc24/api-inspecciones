@@ -1,13 +1,13 @@
-﻿using API.Inspecciones.Interfaces;
-using API.Inspecciones.Models;
+﻿using API.Inspecciones.Models;
 using API.Inspecciones.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Workcube.Interfaces;
 using Workcube.Libraries;
 
 namespace API.Inspecciones.Services
 {
-    public class InspeccionesCategoriasItemsService : IInspeccionesCategoriasItemsService
+    public class InspeccionesCategoriasItemsService : IGlobal<InspeccionCategoriaItem>
     {
         private readonly Context _context;
 
@@ -28,7 +28,7 @@ namespace API.Inspecciones.Services
             objModel.FormularioTipo             = Globals.ToString(data.formularioTipo);
             objModel.FormularioValor            = Globals.ToString(data.formularioValor);
             objModel.IdInspeccion               = Globals.ParseGuid(data.idInspeccion);
-            objModel.InspeccionName             = Globals.ToString(data.inspeccionName);
+            //objModel.InspeccionName             = Globals.ToString(data.inspeccionName);
             objModel.IdInspeccionCategoria      = Globals.ParseGuid(data.idInspeccionCategoria);
             objModel.InspeccionCategoriaName    = Globals.ToString(data.inspeccionCategoriaName);
 
