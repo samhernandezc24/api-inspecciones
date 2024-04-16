@@ -13,14 +13,11 @@ namespace API.Inspecciones.Controllers
     {
         private readonly InspeccionesService _inspeccionesService;
         private readonly InspeccionesTiposService _inspeccionesTiposService;
-        private readonly UnidadesService _unidadesService;
 
-        public InspeccionesController(InspeccionesService inspeccionesService, InspeccionesTiposService inspeccionesTipos, UnidadesService unidadesService)
+        public InspeccionesController(InspeccionesService inspeccionesService, InspeccionesTiposService inspeccionesTipos)
         {
             _inspeccionesService        = inspeccionesService;
             _inspeccionesTiposService   = inspeccionesTipos;
-            _unidadesService            = unidadesService;
-
         }
 
         [HttpPost("Create")]
@@ -32,15 +29,10 @@ namespace API.Inspecciones.Controllers
             try
             {
                 List<dynamic> lstInspeccionesTipos  = await _inspeccionesTiposService.List();
-                List<dynamic> lstUnidadesTemporales = await _unidadesService.List();
-
-                var lstUnidades = await HttpReq.Post("unidades", "unidades/PredictiveEOS");
 
                 objReturn.Result = new
                 {
                     InspeccionesTipos   = lstInspeccionesTipos,
-                    UnidadesTemporales  = lstUnidadesTemporales,
-                    Unidades            = lstUnidades,
                 };
 
                 objReturn.Success(SuccessMessage.REQUEST);

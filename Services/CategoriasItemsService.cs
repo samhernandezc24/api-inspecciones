@@ -51,6 +51,41 @@ namespace API.Inspecciones.Services
             objTransaction.Commit();
         }
 
+        public async Task CreateDuplicate(dynamic data, ClaimsPrincipal user)
+        {
+            var objTransaction = _context.Database.BeginTransaction();
+
+            string idCategoria          = Globals.ParseGuid(data.idCategoria);
+            bool categoriasItemsExist   = await _context.CategoriasItems.AnyAsync(x => x.IdCategoria == idCategoria && !x.Deleted);
+            int categoriaItemNuevoOrden = 1;
+
+            if (categoriasItemsExist)
+            {
+                int categoriaItemLastOrden = await _context.CategoriasItems.Where(x => x.IdCategoria == idCategoria && !x.Deleted).MaxAsync(x => (int?)x.Orden) ?? 0;
+                categoriaItemNuevoOrden = categoriaItemLastOrden + 1;
+            }
+
+            // GUARDAR CATEGORÍA ITEM DUPLICADA
+            CategoriaItem objModel = new CategoriaItem();
+            objModel.IdCategoriaItem        = Guid.NewGuid().ToString();
+            objModel.Name                   = Globals.ToString(data.name);
+            objModel.IdInspeccionTipo       = Globals.ParseGuid(data.idInspeccionTipo);
+            objModel.InspeccionTipoName     = Globals.ToUpper(data.inspeccionTipoName);
+            objModel.IdCategoria            = Globals.ParseGuid(data.idCategoria);
+            objModel.CategoriaName          = Globals.ToUpper(data.categoriaName);
+            objModel.Orden                  = categoriaItemNuevoOrden;
+            objModel.IdFormularioTipo       = Globals.ParseGuid(data.idFormularioTipo);
+            objModel.FormularioTipoName     = Globals.ToString(data.formularioTipoName);
+            objModel.FormularioValor        = Globals.ToString(data.formularioValor);
+            objModel.NoAplica               = false;
+            objModel.SetCreated(Globals.GetUser(user));
+
+            _context.CategoriasItems.Add(objModel);
+
+            await _context.SaveChangesAsync();
+            objTransaction.Commit();
+        }
+
         public Task<dynamic> DataSource(dynamic data, ClaimsPrincipal user)
         {
             throw new NotImplementedException();
@@ -123,6 +158,7 @@ namespace API.Inspecciones.Services
                                 IdFormularioTipo    = string.IsNullOrEmpty(x.IdFormularioTipo) ? "" : x.IdFormularioTipo,
                                 FormularioTipoName  = x.FormularioTipoName,
                                 FormularioValor     = x.FormularioValor,
+                                IsEdit              = false,
                             })
                             .ToListAsync<dynamic>();
         }

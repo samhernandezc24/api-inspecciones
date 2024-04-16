@@ -273,17 +273,17 @@ namespace API.Inspecciones.Services
             return await ExcelManager<RepUnidad>.GetFile(columnsDataTable, lstRows);
         }
 
-         public async Task<List<dynamic>> Predictive(dynamic data)
+        public async Task<List<dynamic>> Predictive(dynamic data)
         {
             // INCLUDES
             string fields = "IdUnidad,NumeroEconomico,NumeroSerie,Descripcion,Modelo,AnioEquipo,IdUnidadMarca,UnidadMarcaName,IdUnidadTipo,UnidadTipoName";
 
             // QUERY
             var lstItems = _context.Unidades
-                .AsNoTracking()
-                .OrderBy(w => w.NumeroEconomico)
-                .Where(x => !x.Deleted)
-                .Select(Globals.BuildSelector<Unidad, Unidad>(fields));
+                            .AsNoTracking()
+                            .Where(x => !x.Deleted)
+                            .OrderBy(w => w.NumeroEconomico)
+                            .Select(Globals.BuildSelector<Unidad, Unidad>(fields));
 
             // INITIALIZATION
             DataSourceBuilder<Unidad> objDataSourceBuilder = new DataSourceBuilder<Unidad>();
@@ -291,40 +291,34 @@ namespace API.Inspecciones.Services
             objDataSourceBuilder.Arguments  = data;
 
             // SEARCH FILTERS
-            Func<Expression<Func<Unidad, bool>>, string, string, Expression<Func<Unidad, bool>>> argSwitchFilters = (argExpression, argField, search) =>
-            {
-                return argExpression;
-            };
+            Func<Expression<Func<Unidad, bool>>, string, string, Expression<Func<Unidad, bool>>> argSwitchFilters = (argExpression, argField, search) => { return argExpression; };
 
-            objDataSourceBuilder.SearchFilters(argSwitchFilters);
+            lstItems = objDataSourceBuilder.SearchFilters(argSwitchFilters);
 
             // TAKE
             lstItems = objDataSourceBuilder.Take();
 
             // DATA MAPPING
-            var lstOriginal = await lstItems.ToListAsync();
-            var lstRows = new List<dynamic>();
+            var lstOriginal     = await lstItems.ToListAsync();
+            var lstRows         = new List<dynamic>();
 
-            if (lstOriginal != null)
+            lstOriginal.ForEach((item) =>
             {
-                lstOriginal.ForEach(item =>
+                lstRows.Add(new
                 {
-                    lstRows.Add(new
-                    {
-                        IdUnidad            = item.IdUnidad,
-                        NumeroEconomico     = item.NumeroEconomico,
-                        NumeroSerie         = item.NumeroSerie,
-                        Descripcion         = item.Descripcion,
-                        Modelo              = item.Modelo,
-                        AnioEquipo          = item.AnioEquipo,
-                        IdUnidadMarca       = item.IdUnidadMarca,
-                        UnidadMarcaName     = item.UnidadMarcaName,
-                        IdUnidadTipo        = item.IdUnidadTipo,
-                        UnidadTipoName      = item.UnidadTipoName,
-                        IsUnidadTemporal    = true,
-                    });
+                    IdUnidad            = item.IdUnidad,
+                    NumeroEconomico     = item.NumeroEconomico,
+                    NumeroSerie         = item.NumeroSerie,
+                    Descripcion         = item.Descripcion,
+                    Modelo              = item.Modelo,
+                    AnioEquipo          = item.AnioEquipo,
+                    IdUnidadMarca       = item.IdUnidadMarca,
+                    UnidadMarcaName     = item.UnidadMarcaName,
+                    IdUnidadTipo        = item.IdUnidadTipo,
+                    UnidadTipoName      = item.UnidadTipoName,
+                    IsUnidadTemporal    = true,
                 });
-            }
+            });
 
             return lstRows;
         }

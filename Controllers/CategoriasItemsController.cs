@@ -78,6 +78,31 @@ namespace API.Inspecciones.Controllers
             return objReturn.build();
         }
 
+        [HttpPost("StoreDuplicate")]
+        [Authorize]
+        public async Task<ActionResult<dynamic>> StoreDuplicate(JsonObject data)
+        {
+            JsonReturn objReturn = new JsonReturn();
+
+            try
+            {
+                await _categoriasItemsService.CreateDuplicate(Globals.JsonData(data), User);
+
+                objReturn.Title     = "Nueva pregunta duplicada";
+                objReturn.Message   = "La pregunta se ha duplicado exitosamente";
+            }
+            catch (AppException ex)
+            {
+                objReturn.Exception(ex);
+            }
+            catch (Exception ex)
+            {
+                objReturn.Exception(ExceptionMessage.RawException(ex));
+            }
+
+            return objReturn.build();
+        }
+
         [HttpPost("Update")]
         [Authorize]
         public async Task<ActionResult<dynamic>> Update(JsonObject data)

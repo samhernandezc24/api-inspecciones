@@ -140,22 +140,11 @@ namespace API.Inspecciones.Controllers
         {
             JsonReturn objReturn = new JsonReturn();
 
-            try
-            {
-                var objData = Globals.JsonData(data);
+            List<dynamic> lstRows = await _unidadesService.Predictive(Globals.JsonData(data));
 
-                objReturn.Result = await _unidadesService.Predictive(objData);
+            objReturn.Result = new { rows = lstRows };
 
-                objReturn.Success(SuccessMessage.REQUEST);
-            }
-            catch (AppException ex)
-            {
-                objReturn.Exception(ex);
-            }
-            catch (Exception ex)
-            {
-                objReturn.Exception(ExceptionMessage.RawException(ex));
-            }
+            objReturn.Success(SuccessMessage.REQUEST);
 
             return objReturn.build();
         }
