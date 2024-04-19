@@ -64,7 +64,7 @@ namespace API.Inspecciones.Services
 
             DataSourceBuilder<UnidadViewModel> objDataTableBuilder = new DataSourceBuilder<UnidadViewModel>(data, lstItems);
 
-            dynamic objDataTableResult = await objDataTableBuilder.build();
+            var objDataTableResult = await objDataTableBuilder.build();
 
             List<UnidadViewModel> lstOriginal = objDataTableResult.rows;
             List<dynamic> lstRows = new List<dynamic>();

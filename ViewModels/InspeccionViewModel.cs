@@ -1,12 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Workcube.Generic;
-
-namespace API.Inspecciones.Models
+﻿namespace API.Inspecciones.ViewModels
 {
-    public class Inspeccion : UserCreated
+    public class InspeccionViewModel
     {
-        [Key]
         public string IdInspeccion { get; set; }
         public string Folio { get; set; }
 
@@ -18,27 +13,22 @@ namespace API.Inspecciones.Models
         public string BaseName { get; set; }
 
         // INSPECCION ESTATUS
-        public virtual InspeccionEstatus InspeccionEstatus { get; set; }
         public string IdInspeccionEstatus { get; set; }
         public string InspeccionEstatusName { get; set; }
 
         // INSPECCION TIPO
-        public virtual InspeccionTipo InspeccionTipo { get; set; }
         public string IdInspeccionTipo { get; set; }
         public string InspeccionTipoCodigo { get; set; }
         public string InspeccionTipoName { get; set; }
 
         // INSPECCION INICIAL
         public DateTime? FechaInspeccionInicial { get; set; }
-        public string FechaInspeccionInicialNatural => FechaInspeccionInicial.HasValue ? FechaInspeccionInicial.Value.ToString("dd DE MMMM DE yyyy A LAS hh:mm tt").ToUpper() : "NA";
-        public DateTime? FechaInspeccionInicialUpdate { get; set; }
-        public string IdUserInspeccionInicial { get; set; }
+        public string FechaInspeccionInicialNatural => FechaInspeccionInicial.HasValue ? FechaInspeccionInicial.Value.ToString("dd/MM/yyyy hh:mm tt").ToUpper() : "";
         public string UserInspeccionInicialName { get; set; }
 
         // INSPECCION FINAL
         public DateTime? FechaInspeccionFinal { get; set; }
-        public string FechaInspeccionFinalNatural => FechaInspeccionFinal.HasValue ? FechaInspeccionFinal.Value.ToString("dd DE MMMM DE yyyy A LAS hh:mm tt").ToUpper() : "NA"; public DateTime? FechaInspeccionFinalUpdate { get; set; }
-        public string IdUserInspeccionFinal { get; set; }
+        public string FechaInspeccionFinalNatural => FechaInspeccionFinal.HasValue ? FechaInspeccionFinal.Value.ToString("dd/MM/yyyy hh:mm tt").ToUpper() : ""; 
         public string UserInspeccionFinalName { get; set; }
 
         public bool IsValid => FechaInspeccionFinal.HasValue && ((DateTime.Now.Date - FechaInspeccionFinal.Value.Date).TotalDays <= 15);
@@ -53,13 +43,13 @@ namespace API.Inspecciones.Models
         public string UnidadNumeroEconomico { get; set; }
         public bool IsUnidadTemporal { get; set; }
 
-        // UNIDAD TIPO
-        public string IdUnidadTipo { get; set; }
-        public string UnidadTipoName { get; set; }
-
         // UNIDAD MARCA
         public string IdUnidadMarca { get; set; }
         public string UnidadMarcaName { get; set; }
+
+        // UNIDAD TIPO
+        public string IdUnidadTipo { get; set; }
+        public string UnidadTipoName { get; set; }
 
         // UNIDAD PLACA TIPO
         public string IdUnidadPlacaTipo { get; set; }
@@ -72,7 +62,6 @@ namespace API.Inspecciones.Models
         public string Locacion { get; set; }
         public string TipoPlataforma { get; set; }
 
-        [Column(TypeName = "decimal(15,3)")]
         public decimal? Capacidad { get; set; }
         public int? Odometro { get; set; }
         public int? Horometro { get; set; }
@@ -81,8 +70,12 @@ namespace API.Inspecciones.Models
         public string FirmaOperador { get; set; }
         public string FirmaVerificador { get; set; }
 
-        public virtual List<InspeccionCategoria> InspeccionesCategorias { get; set; }
-        public virtual List<InspeccionCategoriaItem> InspeccionesCategoriasItems { get; set; }
-        public virtual List<InspeccionFichero> InspeccionesFicheros { get; set; }
+        public string CreatedUserName { get; set; }
+        public DateTime CreatedFecha { get; set; }
+        public string CreatedFechaNatural => CreatedFecha.ToString("dd/MM/yyyy hh:mm tt");
+
+        public string UpdatedUserName { get; set; }
+        public DateTime UpdatedFecha { get; set; }
+        public string UpdatedFechaNatural => UpdatedFecha.ToString("dd/MM/yyyy hh:mm tt");
     }
 }

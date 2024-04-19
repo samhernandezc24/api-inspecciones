@@ -1,19 +1,27 @@
 ﻿using API.Inspecciones.Models;
 using API.Inspecciones.Persistence;
+using API.Inspecciones.ViewModels;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using Workcube.Interfaces;
 using Workcube.Libraries;
+using Workcube.ViewModels;
 
 namespace API.Inspecciones.Services
 {
     public class InspeccionesService : IGlobal<Inspeccion>
     {
         private readonly Context _context;
+        private readonly IMapper _mapper;
 
-        public InspeccionesService(Context context)
+        public InspeccionesService(Context context, IMapper mapper)
         {
-            _context = context;
+            _context    = context;
+            _mapper     = mapper;
         }
 
         public async Task Cancel(dynamic data, ClaimsPrincipal user)
@@ -25,9 +33,9 @@ namespace API.Inspecciones.Services
             // CANCELAR INSPECCIÓN
             Inspeccion objModel = await Find(idInspeccion);
 
-            if (objModel.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb33") { throw new ArgumentException("La inspección ya fue cancelada anteriormente."); }
+            if (objModel.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb35") { throw new ArgumentException("La inspección ya fue cancelada anteriormente."); }
 
-            objModel.IdInspeccionEstatus    = "ea52bdfd-8af6-4f5a-b182-2b99e554eb33";
+            objModel.IdInspeccionEstatus    = "ea52bdfd-8af6-4f5a-b182-2b99e554eb35";
             objModel.InspeccionEstatusName  = "CANCELADO";
             objModel.SetUpdated(Globals.GetUser(user));
 
@@ -47,7 +55,7 @@ namespace API.Inspecciones.Services
             objModel.IdBase                         = Globals.ParseGuid(data.idBase);
             objModel.BaseName                       = Globals.ToUpper(data.baseName);
             objModel.IdInspeccionEstatus            = "ea52bdfd-8af6-4f5a-b182-2b99e554eb31";
-            objModel.InspeccionEstatusName          = "EVALUACIÓN";
+            objModel.InspeccionEstatusName          = "POR EVALUAR";
             objModel.IdInspeccionTipo               = Globals.ParseGuid(data.idInspeccionTipo);
             objModel.InspeccionTipoCodigo           = Globals.ToUpper(data.inspeccionTipoCodigo);
             objModel.InspeccionTipoName             = Globals.ToUpper(data.inspeccionTipoName);
@@ -73,9 +81,9 @@ namespace API.Inspecciones.Services
             objModel.AnioEquipo                     = Globals.ToString(data.anioEquipo);
             objModel.Locacion                       = Globals.ToUpper(data.locacion);
             objModel.TipoPlataforma                 = Globals.ToUpper(data.tipoPlataforma);
-            objModel.Capacidad                      = Globals.ParseDecimal(data.capacidad);
-            objModel.Odometro                       = Globals.ParseInt(data.horometro);
-            objModel.Horometro                      = Globals.ParseInt(data.horometro);
+            objModel.Capacidad                      = Globals.ParseDecimal(data.capacidad) ?? 0;
+            objModel.Odometro                       = Globals.ParseInt(data.horometro) ?? 0;
+            objModel.Horometro                      = Globals.ParseInt(data.horometro) ?? 0;
             objModel.Observaciones                  = Globals.ToUpper(data.observaciones);
             objModel.FirmaOperador                  = Globals.ToUpper(data.firmaOperador);
             objModel.FirmaVerificador               = Globals.ToUpper(data.firmaVerificador);
@@ -99,7 +107,7 @@ namespace API.Inspecciones.Services
             objModel.IdBase                         = Globals.ParseGuid(data.idBase);
             objModel.BaseName                       = Globals.ToUpper(data.baseName);
             objModel.IdInspeccionEstatus            = "ea52bdfd-8af6-4f5a-b182-2b99e554eb31";
-            objModel.InspeccionEstatusName          = "EVALUACIÓN";
+            objModel.InspeccionEstatusName          = "POR EVALUAR";
             objModel.IdInspeccionTipo               = Globals.ParseGuid(data.idInspeccionTipo);
             objModel.InspeccionTipoCodigo           = Globals.ToUpper(data.inspeccionTipoCodigo);
             objModel.InspeccionTipoName             = Globals.ToUpper(data.inspeccionTipoName);
@@ -125,9 +133,9 @@ namespace API.Inspecciones.Services
             objModel.AnioEquipo                     = Globals.ToString(data.anioEquipo);
             objModel.Locacion                       = Globals.ToUpper(data.locacion);
             objModel.TipoPlataforma                 = Globals.ToUpper(data.tipoPlataforma);
-            objModel.Capacidad                      = Globals.ParseDecimal(data.capacidad);
-            objModel.Odometro                       = Globals.ParseInt(data.horometro);
-            objModel.Horometro                      = Globals.ParseInt(data.horometro);
+            objModel.Capacidad                      = Globals.ParseDecimal(data.capacidad) ?? 0;
+            objModel.Odometro                       = Globals.ParseInt(data.horometro) ?? 0;
+            objModel.Horometro                      = Globals.ParseInt(data.horometro) ?? 0;
             objModel.Observaciones                  = Globals.ToUpper(data.observaciones);
             objModel.FirmaOperador                  = Globals.ToUpper(data.firmaOperador);
             objModel.FirmaVerificador               = Globals.ToUpper(data.firmaVerificador);
@@ -155,9 +163,132 @@ namespace API.Inspecciones.Services
             return _context.Inspecciones.Where(item => item.Folio.Contains(contains)).Count() + 1;
         }
 
-        public Task<dynamic> DataSource(dynamic data, ClaimsPrincipal user)
+        public async Task<dynamic> DataSource(dynamic data, ClaimsPrincipal user)
         {
-            throw new NotImplementedException();
+            IQueryable<InspeccionViewModel> lstItems = DataSourceExpression(data);
+
+            DataSourceBuilder<InspeccionViewModel> objDataTableBuilder = new DataSourceBuilder<InspeccionViewModel>(data, lstItems);
+
+            var objDataTableResult = await objDataTableBuilder.build();
+
+            // CONSTRUCCIÓN RETORNO DE DATOS
+            List<InspeccionViewModel> lstOriginal = objDataTableResult.rows;
+            List<dynamic> lstRows = new List<dynamic>();
+
+            int length  = (int)data.length;
+            int page    = (int)data.page;
+            int index   = ((page - 1) * length) + 1;
+
+            lstOriginal.ForEach(item =>
+            {
+                lstRows.Add(new
+                {
+                    index                           = index,
+                    IdInspeccion                    = item.IdInspeccion,
+                    Folio                           = item.Folio,
+                    FechaNatural                    = item.FechaNatural,
+                    IdBase                          = item.IdBase,
+                    BaseName                        = item.BaseName,
+                    IdInspeccionEstatus             = item.IdInspeccionEstatus,
+                    InspeccionEstatusName           = item.InspeccionEstatusName,
+                    IdInspeccionTipo                = item.IdInspeccionTipo,
+                    InspeccionTipoName              = item.InspeccionTipoName,
+                    FechaInspeccionInicialNatural   = item.FechaInspeccionInicialNatural,
+                    UserInspeccionInicialName       = item.UserInspeccionInicialName,
+                    FechaInspeccionFinalNatural     = item.FechaInspeccionFinalNatural,
+                    UserInspeccionFinalName         = item.UserInspeccionFinalName,
+                    IdRequerimiento                 = item.IdRequerimiento,
+                    RequerimientoFolio              = item.RequerimientoFolio,
+                    HasRequerimiento                = !string.IsNullOrEmpty(item.HasRequerimiento),
+                    CreatedUserName                 = item.CreatedUserName,
+                    CreatedFecha                    = item.CreatedFechaNatural,
+                    UpdatedUserName                 = item.UpdatedUserName,
+                    UpdatedFecha                    = item.UpdatedFechaNatural,
+                });
+                index++;
+            });
+
+            var objReturn = new
+            {
+                rows    = lstRows,
+                count   = objDataTableResult.count,
+                length  = objDataTableResult.length,
+                pages   = objDataTableResult.pages,
+                page    = objDataTableResult.page,
+            };
+
+            return objReturn;
+        }
+
+        public IQueryable<InspeccionViewModel> DataSourceExpression(dynamic data)
+        {
+            // INCLUDES
+            IQueryable<InspeccionViewModel> lstItems;
+
+            // APLICAR FILTROS DINÁMICOS
+            // FILTROS
+            var filters = new Dictionary<string, Func<string, Expression<Func<Inspeccion, bool>>>>
+            {
+                {"IdCreatedUser",   (strValue) => item => item.IdCreatedUser    == strValue},
+                {"IdUpdatedUser",   (strValue) => item => item.IdUpdatedUser    == strValue},
+            };
+
+            // FILTROS MULTIPLE
+            var filtersMultiple = new Dictionary<string, Func<string, Expression<Func<Inspeccion, bool>>>>
+            {
+                {"InspeccionEstatus.IdInspeccionEstatus",   (strValue) => item => item.IdInspeccionEstatus  == strValue},
+                {"InspeccionTipo.IdInspeccionTipo",         (strValue) => item => item.IdInspeccionTipo     == strValue},
+                {"IdUnidadTipo",                            (strValue) => item => item.IdUnidadTipo         == strValue},
+            };
+
+            // FILTROS FECHAS
+            DateTime? dateFrom  = SourceExpression<Inspeccion>.Date((string)data.dateFrom);
+            DateTime? dateTo    = SourceExpression<Inspeccion>.Date((string)data.dateTo);
+
+            var dates = new Dictionary<string, DateExpression<Inspeccion>>()
+            {
+                { "Fecha",          new DateExpression<Inspeccion>{ dateFrom = item => item.Fecha.Date          >= dateFrom, dateTo = item => item.Fecha.Date           <= dateTo } },
+                { "CreatedFecha",   new DateExpression<Inspeccion>{ dateFrom = item => item.CreatedFecha.Date   >= dateFrom, dateTo = item => item.CreatedFecha.Date    <= dateTo } },
+                { "UpdatedFecha",   new DateExpression<Inspeccion>{ dateFrom = item => item.UpdatedFecha.Date   >= dateFrom, dateTo = item => item.UpdatedFecha.Date    <= dateTo } }
+            };
+
+            Expression<Func<Inspeccion, bool>> ExpFullWhere = SourceExpression<Inspeccion>.GetExpression(data, filters, dates, filtersMultiple);
+
+            // ORDER BY
+            var orderColumn     = Globals.ToString(data.sort.column);
+            var orderDirection  = Globals.ToString(data.sort.direction);
+
+            Expression<Func<Inspeccion, object>> sortExpression;
+
+            switch (orderColumn)
+            {
+                case "folio"    : sortExpression = (x => x.Folio);          break;
+                default         : sortExpression = (x => x.CreatedFecha);   break;
+            }
+
+            // MAPEAR DATOS
+            List<string> columns = new List<string>();
+
+            columns = Globals.GetArrayColumns(data);
+
+            columns.Add("IdInspeccion");
+            columns.Add("Folio");
+            columns.Add("IdInspeccionEstatus");
+
+            string strColumns = Globals.GetStringColumns(columns);
+
+            // COMPLETE
+            IQueryable<Inspeccion> lstRows = _context.Inspecciones.AsNoTracking();
+
+            lstRows = (orderDirection == "asc") ? lstRows.OrderBy(sortExpression) : lstRows.OrderByDescending(sortExpression);
+
+            lstItems = lstRows
+                        .Where(x => !x.Deleted)
+                        .Where(ExpFullWhere)
+                        .Select(Globals.BuildSelector<Inspeccion, Inspeccion>(strColumns))
+                        .ProjectTo<InspeccionViewModel>(_mapper.ConfigurationProvider);
+
+            return lstItems;
         }
 
         public Task Delete(dynamic data, ClaimsPrincipal user)
@@ -174,10 +305,10 @@ namespace API.Inspecciones.Services
             // CANCELAR INSPECCIÓN
             Inspeccion objModel = await Find(idInspeccion);
 
-            if (objModel.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb32") { throw new ArgumentException("La inspección ya fue finalizada anteriormente."); }
-            if (objModel.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb33") { throw new ArgumentException("La inspección ya fue cancelada anteriormente."); }
+            if (objModel.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb34") { throw new ArgumentException("La inspección ya fue finalizada anteriormente."); }
+            if (objModel.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb35") { throw new ArgumentException("La inspección ya fue cancelada anteriormente."); }
 
-            objModel.IdInspeccionEstatus    = "ea52bdfd-8af6-4f5a-b182-2b99e554eb32";
+            objModel.IdInspeccionEstatus    = "ea52bdfd-8af6-4f5a-b182-2b99e554eb34";
             objModel.InspeccionEstatusName  = "FINALIZADO";
             objModel.SetUpdated(Globals.GetUser(user));
 
