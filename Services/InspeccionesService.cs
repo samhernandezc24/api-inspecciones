@@ -155,7 +155,7 @@ namespace API.Inspecciones.Services
             return _context.Inspecciones.Where(item => item.Folio.Contains(contains)).Count() + 1;
         }
 
-        public async Task<dynamic> DataSource(dynamic data, ClaimsPrincipal user)
+        public Task<dynamic> DataSource(dynamic data, ClaimsPrincipal user)
         {
             throw new NotImplementedException();
         }
