@@ -199,7 +199,7 @@ namespace API.Inspecciones.Services
                     UserInspeccionFinalName         = item.UserInspeccionFinalName,
                     IdRequerimiento                 = item.IdRequerimiento,
                     RequerimientoFolio              = item.RequerimientoFolio,
-                    HasRequerimiento                = !string.IsNullOrEmpty(item.HasRequerimiento),
+                    //HasRequerimiento                = !string.IsNullOrEmpty(item.HasRequerimiento),
                     CreatedUserName                 = item.CreatedUserName,
                     CreatedFecha                    = item.CreatedFechaNatural,
                     UpdatedUserName                 = item.UpdatedUserName,
