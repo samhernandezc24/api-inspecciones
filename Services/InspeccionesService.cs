@@ -72,12 +72,15 @@ namespace API.Inspecciones.Services
             objModel.IdUnidad                       = Globals.ParseGuid(data.idUnidad);
             objModel.UnidadNumeroEconomico          = Globals.ToUpper(data.unidadNumeroEconomico);
             objModel.IsUnidadTemporal               = Globals.ParseBool(data.isUnidadTemporal);
+            objModel.IdUnidadTipo                   = Globals.ParseGuid(data.idUnidadTipo);
+            objModel.UnidadTipoName                 = Globals.ParseGuid(data.unidadTipoName);
             objModel.IdUnidadMarca                  = Globals.ParseGuid(data.idUnidadMarca);
             objModel.UnidadMarcaName                = Globals.ToUpper(data.unidadMarcaName);
             objModel.IdUnidadPlacaTipo              = Globals.ParseGuid(data.idUnidadPlacaTipo);
             objModel.UnidadPlacaTipoName            = Globals.ToUpper(data.unidadPlacaTipoName);
             objModel.Placa                          = Globals.ToUpper(data.placa);
             objModel.NumeroSerie                    = Globals.ToUpper(data.numeroSerie);
+            objModel.Modelo                         = Globals.ToUpper(data.modelo);
             objModel.AnioEquipo                     = Globals.ToString(data.anioEquipo);
             objModel.Locacion                       = Globals.ToUpper(data.locacion);
             objModel.TipoPlataforma                 = Globals.ToUpper(data.tipoPlataforma);
@@ -130,6 +133,7 @@ namespace API.Inspecciones.Services
             objModel.UnidadPlacaTipoName            = Globals.ToUpper(data.unidadPlacaTipoName);
             objModel.Placa                          = Globals.ToUpper(data.placa);
             objModel.NumeroSerie                    = Globals.ToUpper(data.numeroSerie);
+            objModel.Modelo                         = Globals.ToUpper(data.modelo);
             objModel.AnioEquipo                     = Globals.ToString(data.anioEquipo);
             objModel.Locacion                       = Globals.ToUpper(data.locacion);
             objModel.TipoPlataforma                 = Globals.ToUpper(data.tipoPlataforma);
