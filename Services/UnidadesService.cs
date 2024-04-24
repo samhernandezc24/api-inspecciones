@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Numerics;
 using System.Security.Claims;
 using API.Inspecciones.Models;
 using API.Inspecciones.Persistence;
@@ -35,21 +36,24 @@ namespace API.Inspecciones.Services
 
             // GUARDAR UNIDAD TEMPORAL
             Unidad objModel = new Unidad();
-            objModel.IdUnidad           = Guid.NewGuid().ToString();
-            objModel.NumeroEconomico    = unidadNumeroEconomico;
-            objModel.NumeroSerie        = Globals.ToUpper(data.numeroSerie);
-            objModel.Descripcion        = Globals.ToUpper(data.descripcion);
-            objModel.Modelo             = Globals.ToUpper(data.modelo);
-            objModel.AnioEquipo         = Globals.ToUpper(data.anioEquipo);
-            objModel.IdBase             = Globals.ParseGuid(data.idBase);
-            objModel.BaseName           = Globals.ToUpper(data.baseName);
-            objModel.IdUnidadMarca      = Globals.ParseGuid(data.idUnidadMarca);
-            objModel.UnidadMarcaName    = Globals.ToUpper(data.unidadMarcaName);
-            objModel.IdUnidadTipo       = Globals.ParseGuid(data.idUnidadTipo);
-            objModel.UnidadTipoName     = Globals.ToUpper(data.unidadTipoName);
-            objModel.Capacidad          = Globals.ParseDecimal(data.capacidad) ?? 0;
-            objModel.Horometro          = Globals.ParseInt(data.horometro) ?? 0;
-            objModel.Odometro           = Globals.ParseInt(data.odometro) ?? 0;
+            objModel.IdUnidad               = Guid.NewGuid().ToString();
+            objModel.NumeroEconomico        = unidadNumeroEconomico;
+            objModel.IdBase                 = Globals.ParseGuid(data.idBase);
+            objModel.BaseName               = Globals.ToUpper(data.baseName);
+            objModel.IdUnidadTipo           = Globals.ParseGuid(data.idUnidadTipo);
+            objModel.UnidadTipoName         = Globals.ToUpper(data.unidadTipoName);
+            objModel.IdUnidadMarca          = Globals.ParseGuid(data.idUnidadMarca);
+            objModel.UnidadMarcaName        = Globals.ToUpper(data.unidadMarcaName);
+            objModel.IdUnidadPlacaTipo      = Globals.ParseGuid(data.idUnidadPlacaTipo);
+            objModel.UnidadPlacaTipoName    = Globals.ToUpper(data.unidadPlacaTipoName);
+            objModel.Placa                  = Globals.ToUpper(data.placa);
+            objModel.NumeroSerie            = Globals.ToUpper(data.numeroSerie);
+            objModel.Modelo                 = Globals.ToUpper(data.modelo);
+            objModel.AnioEquipo             = Globals.ToUpper(data.anioEquipo);            
+            objModel.Descripcion            = Globals.ToUpper(data.descripcion);
+            objModel.Capacidad              = Globals.ParseDecimal(data.capacidad) ?? 0;
+            objModel.Odometro               = Globals.ParseInt(data.odometro) ?? 0;
+            objModel.Horometro              = Globals.ParseInt(data.horometro) ?? 0;
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.Unidades.Add(objModel);
@@ -276,7 +280,7 @@ namespace API.Inspecciones.Services
         public async Task<List<dynamic>> Predictive(dynamic data)
         {
             // INCLUDES
-            string fields = "IdUnidad,NumeroEconomico,NumeroSerie,Descripcion,Modelo,AnioEquipo,IdUnidadMarca,UnidadMarcaName,IdUnidadTipo,UnidadTipoName";
+            string fields = "IdUnidad,NumeroEconomico,IdBase,BaseName,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,AnioEquipo,Descripcion";
 
             // QUERY
             var lstItems = _context.Unidades
@@ -308,15 +312,19 @@ namespace API.Inspecciones.Services
                 {
                     IdUnidad            = item.IdUnidad,
                     NumeroEconomico     = item.NumeroEconomico,
-                    NumeroSerie         = item.NumeroSerie,
-                    Descripcion         = item.Descripcion,
-                    Modelo              = item.Modelo,
-                    AnioEquipo          = item.AnioEquipo,
-                    IdUnidadMarca       = item.IdUnidadMarca,
-                    UnidadMarcaName     = item.UnidadMarcaName,
+                    IdBase              = item.IdBase,
+                    BaseName            = item.BaseName,
                     IdUnidadTipo        = item.IdUnidadTipo,
                     UnidadTipoName      = item.UnidadTipoName,
-                    IsUnidadTemporal    = true,
+                    IdUnidadMarca       = item.IdUnidadMarca,
+                    UnidadMarcaName     = item.UnidadMarcaName,
+                    IdUnidadPlacaTipo   = item.IdUnidadPlacaTipo,
+                    UnidadPlacaTipoName = item.UnidadPlacaTipoName,
+                    Placa               = item.Placa,
+                    NumeroSerie         = item.NumeroSerie,
+                    Modelo              = item.Modelo,
+                    AnioEquipo          = item.AnioEquipo,
+                    Descripcion         = item.Descripcion
                 });
             });
 
