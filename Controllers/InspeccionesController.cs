@@ -20,6 +20,30 @@ namespace API.Inspecciones.Controllers
             _inspeccionesTiposService   = inspeccionesTipos;
         }
 
+        [HttpPost("DataSource")]
+        [Authorize]
+        public async Task<ActionResult<dynamic>> DataSource(JsonObject data)
+        {
+            JsonReturn objReturn = new JsonReturn();
+
+            try
+            {
+                objReturn.Result = await _inspeccionesService.DataSource(Globals.JsonData(data), User);
+
+                objReturn.Success(SuccessMessage.REQUEST);
+            }
+            catch (AppException ex)
+            {
+                objReturn.Exception(ex);
+            }
+            catch (Exception ex)
+            {
+                objReturn.Exception(ExceptionMessage.RawException(ex));
+            }
+
+            return objReturn.build();
+        }
+
         [HttpPost("Create")]
         [Authorize]
         public async Task<ActionResult<dynamic>> Create()

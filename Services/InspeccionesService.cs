@@ -170,9 +170,7 @@ namespace API.Inspecciones.Services
         public async Task<dynamic> DataSource(dynamic data, ClaimsPrincipal user)
         {
             IQueryable<InspeccionViewModel> lstItems = DataSourceExpression(data);
-
             DataSourceBuilder<InspeccionViewModel> objDataTableBuilder = new DataSourceBuilder<InspeccionViewModel>(data, lstItems);
-
             var objDataTableResult = await objDataTableBuilder.build();
 
             // CONSTRUCCIÓN RETORNO DE DATOS
@@ -203,7 +201,28 @@ namespace API.Inspecciones.Services
                     UserInspeccionFinalName         = item.UserInspeccionFinalName,
                     IdRequerimiento                 = item.IdRequerimiento,
                     RequerimientoFolio              = item.RequerimientoFolio,
-                    //HasRequerimiento                = !string.IsNullOrEmpty(item.HasRequerimiento),
+                    HasRequerimiento                = item.HasRequerimiento,
+                    IdUnidad                        = item.IdUnidad,
+                    UnidadNumeroEconomico           = item.UnidadNumeroEconomico,                   
+                    IsUnidadTemporal                = item.IsUnidadTemporal,
+                    IdUnidadTipo                    = item.IdUnidadTipo,
+                    UnidadTipoName                  = item.UnidadTipoName,
+                    IdUnidadMarca                   = item.IdUnidadMarca,
+                    UnidadMarcaName                 = item.UnidadMarcaName,
+                    IdUnidadPlacaTipo               = item.IdUnidadPlacaTipo,
+                    UnidadPlacaTipoName             = item.UnidadPlacaTipoName,
+                    Placa                           = item.Placa,
+                    NumeroSerie                     = item.NumeroSerie,
+                    Modelo                          = item.Modelo,
+                    AnioEquipo                      = item.AnioEquipo,
+                    Locacion                        = item.Locacion,
+                    TipoPlataforma                  = item.TipoPlataforma,
+                    Capacidad                       = item.Capacidad,
+                    Odometro                        = item.Odometro,
+                    Horometro                       = item.Horometro,
+                    Observaciones                   = item.Observaciones,
+                    FirmaOperador                   = item.FirmaOperador,
+                    FirmaVerificador                = item.FirmaVerificador,
                     CreatedUserName                 = item.CreatedUserName,
                     CreatedFecha                    = item.CreatedFechaNatural,
                     UpdatedUserName                 = item.UpdatedUserName,
@@ -233,16 +252,17 @@ namespace API.Inspecciones.Services
             // FILTROS
             var filters = new Dictionary<string, Func<string, Expression<Func<Inspeccion, bool>>>>
             {
-                {"IdCreatedUser",   (strValue) => item => item.IdCreatedUser    == strValue},
-                {"IdUpdatedUser",   (strValue) => item => item.IdUpdatedUser    == strValue},
+                {"HasRequerimiento",    (strValue) => item => !string.IsNullOrEmpty(item.RequerimientoFolio) == Globals.ParseBool(strValue) },
+                {"IdCreatedUser",       (strValue) => item => item.IdCreatedUser    == strValue},
+                {"IdUpdatedUser",       (strValue) => item => item.IdUpdatedUser    == strValue},
             };
 
             // FILTROS MULTIPLE
             var filtersMultiple = new Dictionary<string, Func<string, Expression<Func<Inspeccion, bool>>>>
             {
-                {"InspeccionEstatus.IdInspeccionEstatus",   (strValue) => item => item.IdInspeccionEstatus  == strValue},
-                {"InspeccionTipo.IdInspeccionTipo",         (strValue) => item => item.IdInspeccionTipo     == strValue},
-                {"IdUnidadTipo",                            (strValue) => item => item.IdUnidadTipo         == strValue},
+                {"IdInspeccionEstatus",     (strValue) => item => item.IdInspeccionEstatus  == strValue},
+                {"IdInspeccionTipo",        (strValue) => item => item.IdInspeccionTipo     == strValue},
+                {"IdUnidadTipo",            (strValue) => item => item.IdUnidadTipo         == strValue},
             };
 
             // FILTROS FECHAS
@@ -273,11 +293,11 @@ namespace API.Inspecciones.Services
             // MAPEAR DATOS
             List<string> columns = new List<string>();
 
-            columns = Globals.GetArrayColumns(data);
+            //columns = Globals.GetArrayColumns(data);
 
             columns.Add("IdInspeccion");
-            columns.Add("Folio");
-            columns.Add("IdInspeccionEstatus");
+            //columns.Add("Folio");
+            //columns.Add("IdInspeccionEstatus");
 
             string strColumns = Globals.GetStringColumns(columns);
 
