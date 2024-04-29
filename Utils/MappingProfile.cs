@@ -10,6 +10,9 @@ namespace API.Inspecciones.Utils
         public MappingProfile()
         {
             // MAPPING PARA RETORNO DE DATASOURCE_EXPRESSION
+            // I
+            CreateMap<Inspeccion, InspeccionViewModel>();
+
             // U
             CreateMap<Unidad, UnidadViewModel>();
 

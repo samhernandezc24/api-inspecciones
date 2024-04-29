@@ -98,6 +98,30 @@ namespace API.Inspecciones.Controllers
             return objReturn.build();
         }
 
+        [HttpPost("PredictiveEOS")]
+        [Authorize]
+        public async Task<ActionResult<dynamic>> PredictiveEOS(JsonObject data)
+        {
+            JsonReturn objReturn = new JsonReturn();
+
+            try
+            {
+                objReturn.Result = await _inspeccionesService.Predictive(Globals.JsonData(data));
+
+                objReturn.Success(SuccessMessage.REQUEST);
+            }
+            catch (AppException ex)
+            {
+                objReturn.Exception(ex);
+            }
+            catch (Exception ex)
+            {
+                objReturn.Exception(ExceptionMessage.RawException(ex));
+            }
+
+            return objReturn.build();
+        }
+
         [HttpPost("Cancel")]
         [Authorize]
         public async Task<ActionResult<dynamic>> Cancel(JsonObject data)

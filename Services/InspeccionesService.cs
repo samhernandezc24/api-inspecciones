@@ -170,8 +170,10 @@ namespace API.Inspecciones.Services
         public async Task<dynamic> DataSource(dynamic data, ClaimsPrincipal user)
         {
             IQueryable<InspeccionViewModel> lstItems = DataSourceExpression(data);
-            DataSourceBuilder<InspeccionViewModel> objDataTableBuilder = new DataSourceBuilder<InspeccionViewModel>(data, lstItems);
-            var objDataTableResult = await objDataTableBuilder.build();
+
+            DataSourceBuilder<InspeccionViewModel> objDataSourceBuilder = new DataSourceBuilder<InspeccionViewModel>(data, lstItems);
+
+            var objDataTableResult = await objDataSourceBuilder.build();
 
             // CONSTRUCCIÓN RETORNO DE DATOS
             List<InspeccionViewModel> lstOriginal = objDataTableResult.rows;
@@ -185,48 +187,36 @@ namespace API.Inspecciones.Services
             {
                 lstRows.Add(new
                 {
-                    index                           = index,
-                    IdInspeccion                    = item.IdInspeccion,
-                    Folio                           = item.Folio,
-                    FechaNatural                    = item.FechaNatural,
-                    IdBase                          = item.IdBase,
-                    BaseName                        = item.BaseName,
-                    IdInspeccionEstatus             = item.IdInspeccionEstatus,
-                    InspeccionEstatusName           = item.InspeccionEstatusName,
-                    IdInspeccionTipo                = item.IdInspeccionTipo,
-                    InspeccionTipoName              = item.InspeccionTipoName,
-                    FechaInspeccionInicialNatural   = item.FechaInspeccionInicialNatural,
-                    UserInspeccionInicialName       = item.UserInspeccionInicialName,
-                    FechaInspeccionFinalNatural     = item.FechaInspeccionFinalNatural,
-                    UserInspeccionFinalName         = item.UserInspeccionFinalName,
-                    IdRequerimiento                 = item.IdRequerimiento,
-                    RequerimientoFolio              = item.RequerimientoFolio,
-                    HasRequerimiento                = item.HasRequerimiento,
-                    IdUnidad                        = item.IdUnidad,
-                    UnidadNumeroEconomico           = item.UnidadNumeroEconomico,                   
-                    IsUnidadTemporal                = item.IsUnidadTemporal,
-                    IdUnidadTipo                    = item.IdUnidadTipo,
-                    UnidadTipoName                  = item.UnidadTipoName,
-                    IdUnidadMarca                   = item.IdUnidadMarca,
-                    UnidadMarcaName                 = item.UnidadMarcaName,
-                    IdUnidadPlacaTipo               = item.IdUnidadPlacaTipo,
-                    UnidadPlacaTipoName             = item.UnidadPlacaTipoName,
-                    Placa                           = item.Placa,
-                    NumeroSerie                     = item.NumeroSerie,
-                    Modelo                          = item.Modelo,
-                    AnioEquipo                      = item.AnioEquipo,
-                    Locacion                        = item.Locacion,
-                    TipoPlataforma                  = item.TipoPlataforma,
-                    Capacidad                       = item.Capacidad,
-                    Odometro                        = item.Odometro,
-                    Horometro                       = item.Horometro,
-                    Observaciones                   = item.Observaciones,
-                    FirmaOperador                   = item.FirmaOperador,
-                    FirmaVerificador                = item.FirmaVerificador,
-                    CreatedUserName                 = item.CreatedUserName,
-                    CreatedFecha                    = item.CreatedFechaNatural,
-                    UpdatedUserName                 = item.UpdatedUserName,
-                    UpdatedFecha                    = item.UpdatedFechaNatural,
+                    index                   = index,
+                    IdInspeccion            = item.IdInspeccion,
+                    Folio                   = item.Folio,
+                    FechaNatural            = item.FechaNatural,
+                    IdBase                  = item.IdBase,
+                    BaseName                = item.BaseName,
+                    IdInspeccionEstatus     = item.IdInspeccionEstatus,
+                    InspeccionEstatusName   = item.InspeccionEstatusName,
+                    IsValid                 = item.IsValid,
+                    IdRequerimiento         = item.IdRequerimiento,
+                    RequerimientoFolio      = item.RequerimientoFolio,
+                    HasRequerimiento        = item.HasRequerimiento,
+                    IdUnidad                = item.IdUnidad,
+                    UnidadNumeroEconomico   = item.UnidadNumeroEconomico,
+                    IsUnidadTemporal        = item.IsUnidadTemporal,
+                    IdUnidadTipo            = item.IdUnidadTipo,
+                    UnidadTipoName          = item.UnidadTipoName,
+                    IdUnidadMarca           = item.IdUnidadMarca,
+                    UnidadMarcaName         = item.UnidadMarcaName,
+                    IdUnidadPlacaTipo       = item.IdUnidadPlacaTipo,
+                    UnidadPlacaTipoName     = item.UnidadPlacaTipoName,
+                    Placa                   = item.Placa,
+                    NumeroSerie             = item.NumeroSerie,
+                    Modelo                  = item.Modelo,
+                    Locacion                = item.Locacion,
+                    AnioEquipo              = item.AnioEquipo,
+                    CreatedUserName         = item.CreatedUserName,
+                    CreatedFechaNatural     = item.CreatedFechaNatural,
+                    UpdatedUserName         = item.UpdatedUserName,
+                    UpdatedFechaNatural     = item.UpdatedFechaNatural,
                 });
                 index++;
             });
@@ -286,30 +276,22 @@ namespace API.Inspecciones.Services
 
             switch (orderColumn)
             {
-                case "folio"    : sortExpression = (x => x.Folio);          break;
-                default         : sortExpression = (x => x.CreatedFecha);   break;
+                case "folio"                : sortExpression = (x => x.Folio);          break;
+                case "fecha"                : sortExpression = (x => x.Fecha);          break;
+                default                     : sortExpression = (x => x.CreatedFecha);   break;
             }
-
-            // MAPEAR DATOS
-            List<string> columns = new List<string>();
-
-            //columns = Globals.GetArrayColumns(data);
-
-            columns.Add("IdInspeccion");
-            //columns.Add("Folio");
-            //columns.Add("IdInspeccionEstatus");
-
-            string strColumns = Globals.GetStringColumns(columns);
 
             // COMPLETE
             IQueryable<Inspeccion> lstRows = _context.Inspecciones.AsNoTracking();
 
             lstRows = (orderDirection == "asc") ? lstRows.OrderBy(sortExpression) : lstRows.OrderByDescending(sortExpression);
 
+            string strFields = "IdInspeccion,Folio,Fecha,IdBase,BaseName,IdInspeccionEstatus,InspeccionEstatusName,IdRequerimiento,RequerimientoFolio,IdUnidad,UnidadNumeroEconomico,IsUnidadTemporal,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,Locacion,AnioEquipo,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
+
             lstItems = lstRows
                         .Where(x => !x.Deleted)
                         .Where(ExpFullWhere)
-                        .Select(Globals.BuildSelector<Inspeccion, Inspeccion>(strColumns))
+                        .Select(Globals.BuildSelector<Inspeccion, Inspeccion>(strFields))
                         .ProjectTo<InspeccionViewModel>(_mapper.ConfigurationProvider);
 
             return lstItems;
@@ -386,6 +368,74 @@ namespace API.Inspecciones.Services
                 .OrderBy(x => x.Fecha)
                 .Select(Globals.BuildSelector<Inspeccion, Inspeccion>(fields))
                 .ToListAsync<dynamic>();
+        }
+
+        public async Task<List<dynamic>> Predictive(dynamic data)
+        {
+            // INCLUDES
+            string fields = "IdInspeccion,Folio,Fecha,IdBase,BaseName,IdInspeccionEstatus,InspeccionEstatusName,IdRequerimiento,RequerimientoFolio,IdUnidad,UnidadNumeroEconomico,IsUnidadTemporal,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,Locacion,AnioEquipo,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
+
+            // QUERY
+            var lstItems = _context.Inspecciones
+                            .AsNoTracking()
+                            .Where(x => !x.Deleted)
+                            .OrderBy(w => w.Folio)
+                            .Select(Globals.BuildSelector<Inspeccion, Inspeccion>(fields));
+
+            // INITIALIZATION
+            DataSourceBuilder<Inspeccion> objDataSourceBuilder = new DataSourceBuilder<Inspeccion>();
+            objDataSourceBuilder.Source     = lstItems;
+            objDataSourceBuilder.Arguments  = data;
+
+            // SEARCH FILTERS
+            Func<Expression<Func<Inspeccion, bool>>, string, string, Expression<Func<Inspeccion, bool>>> argSwitchFilters = (argExpression, argField, search) => { return argExpression; };
+
+            lstItems = objDataSourceBuilder.SearchFilters(argSwitchFilters);
+
+            // TAKE
+            lstItems = objDataSourceBuilder.Take();
+
+            // DATA MAPPING
+            var lstOriginal     = await lstItems.ToListAsync();
+            var lstRows         = new List<dynamic>();
+
+            lstOriginal.ForEach((item) =>
+            {
+                lstRows.Add(new
+                {
+                    IdInspeccion            = item.IdInspeccion,
+                    Folio                   = item.Folio,
+                    Fecha                   = item.Fecha,
+                    IdBase                  = item.IdBase,
+                    BaseName                = item.BaseName,
+                    IdInspeccionEstatus     = item.IdInspeccionEstatus,
+                    InspeccionEstatusName   = item.InspeccionEstatusName,
+                    IsValid                 = item.IsValid,
+                    IdRequerimiento         = item.IdRequerimiento,
+                    RequerimientoFolio      = item.RequerimientoFolio,
+                    HasRequerimiento        = item.HasRequerimiento,
+                    IdUnidad                = item.IdUnidad,
+                    UnidadNumeroEconomico   = item.UnidadNumeroEconomico,
+                    IsUnidadTemporal        = item.IsUnidadTemporal,
+                    IdUnidadTipo            = item.IdUnidadTipo,
+                    UnidadTipoName          = item.UnidadTipoName,
+                    IdUnidadMarca           = item.IdUnidadMarca,
+                    UnidadMarcaName         = item.UnidadMarcaName,
+                    IdUnidadPlacaTipo       = item.IdUnidadPlacaTipo,
+                    UnidadPlacaTipoName     = item.UnidadPlacaTipoName,
+                    Placa                   = item.Placa,
+                    NumeroSerie             = item.NumeroSerie,
+                    Modelo                  = item.Modelo,
+                    Locacion                = item.Locacion,
+                    AnioEquipo              = item.AnioEquipo,
+                    CreatedUserName         = item.CreatedUserName,
+                    CreatedFechaNatural     = item.CreatedFechaNatural,
+                    UpdatedUserName         = item.UpdatedUserName,
+                    UpdatedFechaNatural     = item.UpdatedFechaNatural,
+                });
+            });
+
+            return lstRows;
         }
 
         public Task<byte[]> Reporte(dynamic data)
