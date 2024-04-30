@@ -52,7 +52,7 @@ namespace API.Inspecciones.Controllers
 
             try
             {
-                List<dynamic> lstInspeccionesTipos  = await _inspeccionesTiposService.List();
+                List<dynamic> lstInspeccionesTipos = await _inspeccionesTiposService.List();
 
                 objReturn.Result = new
                 {

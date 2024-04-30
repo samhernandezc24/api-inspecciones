@@ -47,6 +47,13 @@ namespace API.Inspecciones.Services
         {
             var objTransaction = _context.Database.BeginTransaction();
 
+            string idUnidad = Globals.ParseGuid(data.idUnidad);
+            string idInspeccionEstatus = "ea52bdfd-8af6-4f5a-b182-2b99e554eb31";
+
+            bool findUnidadInspeccion = await _context.Inspecciones.AnyAsync(x => x.IdUnidad == idUnidad && x.IdInspeccionEstatus == idInspeccionEstatus && !x.Deleted);
+
+            if (findUnidadInspeccion) { throw new ArgumentException("No se puede programar una nueva inspección para esta unidad porque ya tiene una inspección pendiente."); }
+
             // GUARDAR INSPECCIÓN
             Inspeccion objModel = new Inspeccion();
 
@@ -54,13 +61,13 @@ namespace API.Inspecciones.Services
             objModel.Fecha                          = Globals.DateTime(data.fecha);
             objModel.IdBase                         = Globals.ParseGuid(data.idBase);
             objModel.BaseName                       = Globals.ToUpper(data.baseName);
-            objModel.IdInspeccionEstatus            = "ea52bdfd-8af6-4f5a-b182-2b99e554eb31";
+            objModel.IdInspeccionEstatus            = idInspeccionEstatus;
             objModel.InspeccionEstatusName          = "POR EVALUAR";
             objModel.IdInspeccionTipo               = Globals.ParseGuid(data.idInspeccionTipo);
             objModel.InspeccionTipoCodigo           = Globals.ToUpper(data.inspeccionTipoCodigo);
             objModel.InspeccionTipoName             = Globals.ToUpper(data.inspeccionTipoName);
-            objModel.FechaInspeccionInicial         = DateTime.Now;
-            objModel.FechaInspeccionInicialUpdate   = DateTime.Now;
+            objModel.FechaInspeccionInicial         = Globals.DateTime(data.fechaInspeccionInicial);
+            objModel.FechaInspeccionInicialUpdate   = Globals.DateTime(data.fechaInspeccionInicial);
             objModel.IdUserInspeccionInicial        = Globals.GetUser(user).Id;
             objModel.UserInspeccionInicialName      = Globals.GetUser(user).Nombre;
             objModel.FechaInspeccionFinal           = Globals.DateTime(data.fechaInspeccionFinal);
@@ -69,7 +76,7 @@ namespace API.Inspecciones.Services
             objModel.UserInspeccionFinalName        = Globals.GetUser(user).Nombre;
             objModel.IdRequerimiento                = Globals.ParseGuid(data.idRequerimiento);
             objModel.RequerimientoFolio             = Globals.ToUpper(data.requerimientoFolio);
-            objModel.IdUnidad                       = Globals.ParseGuid(data.idUnidad);
+            objModel.IdUnidad                       = idUnidad;
             objModel.UnidadNumeroEconomico          = Globals.ToUpper(data.unidadNumeroEconomico);
             objModel.IsUnidadTemporal               = Globals.ParseBool(data.isUnidadTemporal);
             objModel.IdUnidadTipo                   = Globals.ParseGuid(data.idUnidadTipo);
@@ -190,6 +197,7 @@ namespace API.Inspecciones.Services
                     index                   = index,
                     IdInspeccion            = item.IdInspeccion,
                     Folio                   = item.Folio,
+                    Fecha                   = item.Fecha,
                     FechaNatural            = item.FechaNatural,
                     IdBase                  = item.IdBase,
                     BaseName                = item.BaseName,
