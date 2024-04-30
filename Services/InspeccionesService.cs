@@ -92,7 +92,7 @@ namespace API.Inspecciones.Services
             objModel.Locacion                       = Globals.ToUpper(data.locacion);
             objModel.TipoPlataforma                 = Globals.ToUpper(data.tipoPlataforma);
             objModel.Capacidad                      = Globals.ParseDecimal(data.capacidad) ?? 0;
-            objModel.Odometro                       = Globals.ParseInt(data.horometro) ?? 0;
+            objModel.Odometro                       = Globals.ParseInt(data.odometro) ?? 0;
             objModel.Horometro                      = Globals.ParseInt(data.horometro) ?? 0;
             objModel.Observaciones                  = Globals.ToUpper(data.observaciones);
             objModel.FirmaOperador                  = Globals.ToUpper(data.firmaOperador);
@@ -203,6 +203,9 @@ namespace API.Inspecciones.Services
                     BaseName                = item.BaseName,
                     IdInspeccionEstatus     = item.IdInspeccionEstatus,
                     InspeccionEstatusName   = item.InspeccionEstatusName,
+                    IdInspeccionTipo        = item.IdInspeccionTipo,
+                    InspeccionTipoCodigo    = item.InspeccionTipoCodigo,
+                    InspeccionTipoName      = item.InspeccionTipoName,
                     IsValid                 = item.IsValid,
                     IdRequerimiento         = item.IdRequerimiento,
                     RequerimientoFolio      = item.RequerimientoFolio,
@@ -294,7 +297,7 @@ namespace API.Inspecciones.Services
 
             lstRows = (orderDirection == "asc") ? lstRows.OrderBy(sortExpression) : lstRows.OrderByDescending(sortExpression);
 
-            string strFields = "IdInspeccion,Folio,Fecha,IdBase,BaseName,IdInspeccionEstatus,InspeccionEstatusName,IdRequerimiento,RequerimientoFolio,IdUnidad,UnidadNumeroEconomico,IsUnidadTemporal,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,Locacion,AnioEquipo,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
+            string strFields = "IdInspeccion,Folio,Fecha,IdBase,BaseName,IdInspeccionEstatus,InspeccionEstatusName,IdInspeccionTipo,InspeccionTipoCodigo,InspeccionTipoName,IdRequerimiento,RequerimientoFolio,IdUnidad,UnidadNumeroEconomico,IsUnidadTemporal,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,Locacion,AnioEquipo,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
 
             lstItems = lstRows
                         .Where(x => !x.Deleted)
