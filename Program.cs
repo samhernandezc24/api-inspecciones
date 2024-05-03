@@ -21,8 +21,10 @@ builder.Services.AddScoped<CategoriasItemsService, CategoriasItemsService>();
 builder.Services.AddScoped<FormulariosTiposService, FormulariosTiposService>();
 builder.Services.AddScoped<InspeccionesFicherosService, InspeccionesFicherosService>();
 builder.Services.AddScoped<InspeccionesService, InspeccionesService>();
+builder.Services.AddScoped<InspeccionesCategoriasService, InspeccionesCategoriasService>();
 builder.Services.AddScoped<InspeccionesTiposService, InspeccionesTiposService>();
 builder.Services.AddScoped<UnidadesService, UnidadesService>();
+builder.Services.AddScoped<UnidadesCapacidadesMedidadesService, UnidadesCapacidadesMedidadesService>();
 
 // Agregar servicios al contenedor.
 builder.Services.AddControllers();

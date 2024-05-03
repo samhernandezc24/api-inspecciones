@@ -1,28 +1,27 @@
-using API.Inspecciones.Persistence;
+﻿using API.Inspecciones.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Inspecciones.Services
 {
-    public class FormulariosTiposService
+    public class UnidadesCapacidadesMedidadesService
     {
         private readonly Context _context;
 
-        public FormulariosTiposService(Context context)
+        public UnidadesCapacidadesMedidadesService(Context context)
         {
-            _context    = context;
+            _context = context;
         }
 
         public async Task<List<dynamic>> List()
         {
-            return await _context.FormulariosTipos
+            return await _context.UnidadesCapacidadesMedidas
                             .AsNoTracking()
-                            .OrderBy(x => x.Orden)
+                            .OrderBy(x => x.Name)
                             .Where(x => !x.Deleted)
                             .Select(x => new
                             {
-                                IdFormularioTipo   = x.IdFormularioTipo,
-                                Name               = x.Name,
-                                Descripcion        = x.Descripcion,
+                                IdUnidadCapacidadMedida = x.IdUnidadCapacidadMedida,
+                                Name                    = x.Name,
                             })
                             .ToListAsync<dynamic>();
         }

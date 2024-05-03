@@ -34,15 +34,12 @@ namespace API.Inspecciones.Services
             CategoriaItem objModel = new CategoriaItem();
             objModel.IdCategoriaItem        = Guid.NewGuid().ToString();
             objModel.Name                   = "Pregunta";
-            objModel.IdInspeccionTipo       = Globals.ParseGuid(data.idInspeccionTipo);
-            objModel.InspeccionTipoName     = Globals.ToUpper(data.inspeccionTipoName);
             objModel.IdCategoria            = Globals.ParseGuid(data.idCategoria);
             objModel.CategoriaName          = Globals.ToUpper(data.categoriaName);
             objModel.Orden                  = categoriaItemNuevoOrden;
             objModel.IdFormularioTipo       = "ea52bdfd-8af6-4f5a-b182-2b99e554eb32";
             objModel.FormularioTipoName     = "Opción múltiple";
             objModel.FormularioValor        = "Sí,No";
-            objModel.NoAplica               = false;
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.CategoriasItems.Add(objModel);
@@ -69,15 +66,12 @@ namespace API.Inspecciones.Services
             CategoriaItem objModel = new CategoriaItem();
             objModel.IdCategoriaItem        = Guid.NewGuid().ToString();
             objModel.Name                   = Globals.ToString(data.name);
-            objModel.IdInspeccionTipo       = Globals.ParseGuid(data.idInspeccionTipo);
-            objModel.InspeccionTipoName     = Globals.ToUpper(data.inspeccionTipoName);
             objModel.IdCategoria            = Globals.ParseGuid(data.idCategoria);
             objModel.CategoriaName          = Globals.ToUpper(data.categoriaName);
             objModel.Orden                  = categoriaItemNuevoOrden;
             objModel.IdFormularioTipo       = Globals.ParseGuid(data.idFormularioTipo);
             objModel.FormularioTipoName     = Globals.ToString(data.formularioTipoName);
             objModel.FormularioValor        = Globals.ToString(data.formularioValor);
-            objModel.NoAplica               = false;
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.CategoriasItems.Add(objModel);
@@ -185,7 +179,6 @@ namespace API.Inspecciones.Services
             objModel.IdFormularioTipo       = Globals.ParseGuid(data.idFormularioTipo);
             objModel.FormularioTipoName     = Globals.ToString(data.formularioTipoName);
             objModel.FormularioValor        = Globals.ToString(data.formularioValor);
-            objModel.NoAplica               = false;
             objModel.SetUpdated(Globals.GetUser(user));
 
             _context.CategoriasItems.Update(objModel);

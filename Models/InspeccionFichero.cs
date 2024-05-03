@@ -8,12 +8,10 @@ namespace API.Inspecciones.Models
         [Key]
         public string IdInspeccionFichero { get; set; }
 
+        public string Path {  get; set; }
+
         // INSPECCION
         public virtual Inspeccion Inspeccion { get; set; }
         public string IdInspeccion { get; set; }
-        public string InspeccionFolio { get; set; }
-
-        public string Path {  get; set; }
-        public int Orden {  get; set; }
     }
 }

@@ -18,5 +18,6 @@ namespace API.Inspecciones.Models
         public int Orden {  get; set; }
 
         public virtual List<CategoriaItem> CategoriasItems { get; set; }
+        public virtual List<InspeccionCategoria> InspeccionesCategorias { get; set; }
     }
 }

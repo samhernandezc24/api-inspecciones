@@ -36,7 +36,12 @@ namespace API.Inspecciones.Models
         [Column(TypeName = "decimal(15,3)")]
         public decimal Capacidad { get; set; }
 
-        public int Horometro { get; set; }
-        public int Odometro { get; set; }
+        // UNIDAD CAPACIDAD MEDIDA
+        public virtual UnidadCapacidadMedida UnidadCapacidadMedida { get; set; }
+        public string IdUnidadCapacidadMedida { get; set; }
+        public string UnidadCapacidadMedidaName { get; set; }
+
+        public int? Horometro { get; set; }
+        public int? Odometro { get; set; }
     }
 }

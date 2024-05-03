@@ -2,129 +2,107 @@
 using API.Inspecciones.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using Workcube.Interfaces;
 using Workcube.Libraries;
 
 namespace API.Inspecciones.Services
 {
-    public class InspeccionesCategoriasService : IGlobal<InspeccionCategoria>
+    public class InspeccionesCategoriasService
     {
         private readonly Context _context;
+        private readonly InspeccionesService _inspeccionesService;
 
-        public InspeccionesCategoriasService(Context context)
+        public InspeccionesCategoriasService(Context context, InspeccionesService inspeccionesService)
         {
-            _context = context;
+            _context                = context;
+            _inspeccionesService    = inspeccionesService;
         }
 
-        public async Task Create(dynamic data, ClaimsPrincipal user)
+        public async Task<bool> Create(dynamic data, ClaimsPrincipal user)
         {
-            if (!await HttpReq.GetPrivilegio("INSPECCIONES_CATEGORIAS_CREATE", user)) { throw new AppException(ExceptionMessage.SESSION_003); };
-
-            var objUser         = Globals.GetUser(user);
-            var objTransaction  = _context.Database.BeginTransaction();
-
-            // GUARDAR CATEGORIA
-            InspeccionCategoria objModel = new InspeccionCategoria();
-
-            objModel.IdInspeccionCategoria  = Guid.NewGuid().ToString();
-            objModel.Name                   = Globals.ToString(data.name);
-            objModel.IdInspeccion           = Globals.ParseGuid(data.idInspeccion);
-            objModel.InspeccionFolio        = Globals.ToString(data.inspeccionFolio);
-            //objModel.InspeccionName         = Globals.ToString(data.inspeccionName);
-            objModel.SetCreated(objUser);
-
-            _context.InspeccionesCategorias.Add(objModel);
-            await _context.SaveChangesAsync();
-            objTransaction.Commit();
-        }
-
-        public Task<dynamic> DataSource(dynamic data, ClaimsPrincipal user)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task Delete(dynamic data, ClaimsPrincipal user)
-        {
-            if (!await HttpReq.GetPrivilegio("INSPECCIONES_CATEGORIAS_DELETE", user)) { throw new AppException(ExceptionMessage.SESSION_003); }
-
+            var objUser = Globals.GetUser(user);
             var objTransaction = _context.Database.BeginTransaction();
 
-            // ELIMINAR CATEGORIA
-            string idInspeccionCategoria = Globals.ParseGuid(data.idInspeccionCategoria);
-            InspeccionCategoria objModel = await Find(idInspeccionCategoria);
+            string idInspeccion     = Globals.ParseGuid(data.idInspeccion);
+            bool isParcial          = Globals.ParseBool(data.isParcial);
+            bool isSatisfactorio    = Globals.ParseBool(data.isSatisfactorio);
 
-            if (objModel.Deleted) { throw new ArgumentException("La categoría ya fue eliminada anteriormente"); }
+            Inspeccion objInspeccion = await _inspeccionesService.Find(idInspeccion);
 
-            objModel.Deleted = true;
-            objModel.SetUpdated(Globals.GetUser(user));
+            objInspeccion.FechaInspeccionInicial        = Globals.DateTime(data.fechaInspeccionInicial);
+            objInspeccion.FechaInspeccionInicialUpdate  = Globals.DateTime(data.fechaInspeccionInicial);
+            objInspeccion.IdUserInspeccionInicial       = objUser.Id;
+            objInspeccion.UserInspeccionInicialName     = objUser.Nombre;
 
-            _context.InspeccionesCategorias.Update(objModel);
+            objInspeccion.FechaInspeccionFinal          = Globals.DateTime(data.fechaInspeccionFinal);
+            objInspeccion.FechaInspeccionFinalUpdate    = Globals.DateTime(data.fechaInspeccionFinal);
+            objInspeccion.IdUserInspeccionFinal         = objUser.Id;
+            objInspeccion.UserInspeccionFinalName       = objUser.Nombre;
+
+            if (!isParcial) { objInspeccion.Evaluado = true; }
+
+            objInspeccion.FechaEvaluacion   = DateTime.Now;
+            objInspeccion.isSatisfactorio   = isSatisfactorio;
+            objInspeccion.SetUpdated(objUser);
+
+            List<InspeccionCategoria> rangeCategoria = new List<InspeccionCategoria>();
+            List<InspeccionCategoriaValue> rangeCategoriaValue = new List<InspeccionCategoriaValue>();
+
+            foreach (var categoria in data.categorias)
+            {
+                InspeccionCategoria objCategoria = new InspeccionCategoria();
+
+                objCategoria.IdInspeccionCategoria  = Guid.NewGuid().ToString();
+                objCategoria.IdInspeccion           = idInspeccion;
+                objCategoria.IdCategoria            = Globals.ParseGuid(categoria.idCategoria);
+                objCategoria.CategoriaName          = Globals.ToUpper(categoria.name);
+                rangeCategoria.Add(objCategoria);
+
+                foreach (var item in categoria.categoriasItems)
+                {
+                    InspeccionCategoriaValue objValue = new InspeccionCategoriaValue();
+
+                    objValue.IdInspeccionCategoriaValue     = Guid.NewGuid().ToString();
+                    objValue.IdInspeccionCategoria          = objCategoria.IdInspeccionCategoria;
+                    objValue.IdCategoriaItem                = Globals.ParseGuid(item.idCategoriaItem);
+                    objValue.CategoriaItemName              = Globals.ToUpper(item.name);
+                    objValue.IdFormularioTipo               = Globals.ParseGuid(item.idFormularioTipo);
+                    objValue.FormularioTipoName             = Globals.ToUpper(item.formularioTipoName);
+                    objValue.FormularioValor                = "";
+                    objValue.Value                          = Globals.ToUpper(item.value);
+                    rangeCategoriaValue.Add(objValue);
+                }
+            }
+
+            _context.InspeccionesCategorias.AddRange(rangeCategoria);
+            _context.InspeccionesCategoriasValues.AddRange(rangeCategoriaValue);
+
             await _context.SaveChangesAsync();
             objTransaction.Commit();
+
+            return isParcial;
         }
 
-        public async Task<InspeccionCategoria> Find(string id)
-        {
-            return await _context.InspeccionesCategorias.FindAsync(id);
-        }
-
-        public async Task<InspeccionCategoria> FindSelectorById(string id, string fields)
-        {
-            return await _context.InspeccionesCategorias.AsNoTracking().Where(x => x.IdInspeccionCategoria == id)
-                            .Select(Globals.BuildSelector<InspeccionCategoria, InspeccionCategoria>(fields)).FirstOrDefaultAsync();
-        }
-
-        public async Task<List<dynamic>> List()
-        {
-            return await _context.InspeccionesCategorias.AsNoTracking()
-                            .Where(x => !x.Deleted)
-                            .OrderBy(x => x.CreatedFecha)
-                            .Select(x => new
-                            {
-                                IdInspeccionCategoria   = x.IdInspeccionCategoria,
-                                Name                    = x.Name,
-                            })
-                            .ToListAsync<dynamic>();
-        }
-
-        public async Task<List<dynamic>> List(string idInspeccion)
+        public async Task<List<dynamic>> ListEvaluacion(string idInspeccion)
         {
             return await _context.InspeccionesCategorias
                             .AsNoTracking()
-                            .Where(x => x.IdInspeccion == idInspeccion && !x.Deleted)
+                            .Where(x => x.IdInspeccion == idInspeccion)
                             .OrderBy(x => x.CreatedFecha)
                             .Select(x => new
                             {
-                                IdInspeccionCategoria   = x.IdInspeccionCategoria,
-                                Name                    = x.Name,
+                                IdCategoria     = x.IdCategoria,
+                                Name            = x.CategoriaName,
+                                CategoriasItems = x.InspeccionesCategoriasValues
+                                                    .OrderBy(d => d.CreatedFecha)
+                                                    .Select(d => new
+                                                    {
+                                                        IdCategoriaItem     = d.IdCategoriaItem,
+                                                        Name                = d.CategoriaItemName,
+                                                        IdFormularioTipo    = d.IdFormularioTipo,
+                                                        FormularioTipoName  = d.FormularioTipoName,
+                                                    }).ToList()
                             })
                             .ToListAsync<dynamic>();
-                    
-        }
-
-        public Task<byte[]> Reporte(dynamic data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task Update(dynamic data, ClaimsPrincipal user)
-        {
-            if (!await HttpReq.GetPrivilegio("INSPECCIONES_CATEGORIAS_UPDATE", user)) { throw new AppException(ExceptionMessage.SESSION_003); };
-
-            var objTransaction = _context.Database.BeginTransaction();
-
-            // ACTUALIZAR CATEGORIA
-            string idInspeccionCategoria = Globals.ParseGuid(data.idInspeccionCategoria);
-
-            InspeccionCategoria objModel = await Find(idInspeccionCategoria);
-
-            if (objModel == null) { throw new ArgumentException("No se ha encontrado la categoría."); }
-
-            objModel.Name = Globals.ToString(data.name);
-
-            _context.InspeccionesCategorias.Update(objModel);
-            await _context.SaveChangesAsync();
-            objTransaction.Commit();
         }
     }
 }
