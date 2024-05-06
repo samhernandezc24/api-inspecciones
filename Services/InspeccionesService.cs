@@ -58,7 +58,7 @@ namespace API.Inspecciones.Services
             Inspeccion objModel = new Inspeccion();
 
             objModel.IdInspeccion                   = Guid.NewGuid().ToString();
-            objModel.Fecha                          = Globals.DateTime(data.fecha);
+            objModel.FechaProgramada                = Globals.DateTime(data.fechaProgramada);
             objModel.IdBase                         = Globals.ParseGuid(data.idBase);
             objModel.BaseName                       = Globals.ToUpper(data.baseName);
             objModel.IdInspeccionEstatus            = idInspeccionEstatus;
@@ -113,7 +113,7 @@ namespace API.Inspecciones.Services
             Inspeccion objModel = new Inspeccion();
 
             objModel.IdInspeccion                   = Guid.NewGuid().ToString();
-            objModel.Fecha                          = Globals.DateTime(data.fecha);
+            objModel.FechaProgramada                = Globals.DateTime(data.fechaProgramada);
             objModel.IdBase                         = Globals.ParseGuid(data.idBase);
             objModel.BaseName                       = Globals.ToUpper(data.baseName);
             objModel.IdInspeccionEstatus            = "ea52bdfd-8af6-4f5a-b182-2b99e554eb31";
@@ -197,7 +197,7 @@ namespace API.Inspecciones.Services
                     index                   = index,
                     IdInspeccion            = item.IdInspeccion,
                     Folio                   = item.Folio,
-                    Fecha                   = item.Fecha,
+                    FechaProgramada         = item.Fecha,
                     FechaNatural            = item.FechaNatural,
                     IdBase                  = item.IdBase,
                     BaseName                = item.BaseName,
@@ -272,9 +272,9 @@ namespace API.Inspecciones.Services
 
             var dates = new Dictionary<string, DateExpression<Inspeccion>>()
             {
-                { "Fecha",          new DateExpression<Inspeccion>{ dateFrom = item => item.Fecha.Date          >= dateFrom, dateTo = item => item.Fecha.Date           <= dateTo } },
-                { "CreatedFecha",   new DateExpression<Inspeccion>{ dateFrom = item => item.CreatedFecha.Date   >= dateFrom, dateTo = item => item.CreatedFecha.Date    <= dateTo } },
-                { "UpdatedFecha",   new DateExpression<Inspeccion>{ dateFrom = item => item.UpdatedFecha.Date   >= dateFrom, dateTo = item => item.UpdatedFecha.Date    <= dateTo } }
+                { "Fecha",          new DateExpression<Inspeccion>{ dateFrom = item => item.FechaProgramada.Date    >= dateFrom, dateTo = item => item.FechaProgramada.Date     <= dateTo } },
+                { "CreatedFecha",   new DateExpression<Inspeccion>{ dateFrom = item => item.CreatedFecha.Date       >= dateFrom, dateTo = item => item.CreatedFecha.Date        <= dateTo } },
+                { "UpdatedFecha",   new DateExpression<Inspeccion>{ dateFrom = item => item.UpdatedFecha.Date       >= dateFrom, dateTo = item => item.UpdatedFecha.Date        <= dateTo } }
             };
 
             Expression<Func<Inspeccion, bool>> ExpFullWhere = SourceExpression<Inspeccion>.GetExpression(data, filters, dates, filtersMultiple);
@@ -287,9 +287,9 @@ namespace API.Inspecciones.Services
 
             switch (orderColumn)
             {
-                case "folio"                : sortExpression = (x => x.Folio);          break;
-                case "fecha"                : sortExpression = (x => x.Fecha);          break;
-                default                     : sortExpression = (x => x.CreatedFecha);   break;
+                case "folio"                : sortExpression = (x => x.Folio);              break;
+                case "fecha"                : sortExpression = (x => x.FechaProgramada);    break;
+                default                     : sortExpression = (x => x.CreatedFecha);       break;
             }
 
             // COMPLETE
@@ -297,7 +297,7 @@ namespace API.Inspecciones.Services
 
             lstRows = (orderDirection == "asc") ? lstRows.OrderBy(sortExpression) : lstRows.OrderByDescending(sortExpression);
 
-            string strFields = "IdInspeccion,Folio,Fecha,IdBase,BaseName,IdInspeccionEstatus,InspeccionEstatusName,IdInspeccionTipo,InspeccionTipoCodigo,InspeccionTipoName,IdRequerimiento,RequerimientoFolio,IdUnidad,UnidadNumeroEconomico,IsUnidadTemporal,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,Locacion,AnioEquipo,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
+            string strFields = "IdInspeccion,Folio,FechaProgramada,IdBase,BaseName,IdInspeccionEstatus,InspeccionEstatusName,IdInspeccionTipo,InspeccionTipoCodigo,InspeccionTipoName,IdRequerimiento,RequerimientoFolio,IdUnidad,UnidadNumeroEconomico,IsUnidadTemporal,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,Locacion,AnioEquipo,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
 
             lstItems = lstRows
                         .Where(x => !x.Deleted)
@@ -349,7 +349,7 @@ namespace API.Inspecciones.Services
             var lstResult = await _context.Inspecciones
                                 .AsNoTracking()
                                 .Where(x =>  lstIds.Contains(x.IdUnidad) && !x.Deleted)
-                                .OrderByDescending(x => x.Fecha)
+                                .OrderByDescending(x => x.FechaProgramada)
                                 .ToListAsync<dynamic>();
 
             var lstGroup = lstResult.GroupBy(x => x.IdUnidad, x => x, (key, data) => new
@@ -376,7 +376,7 @@ namespace API.Inspecciones.Services
             return await _context.Inspecciones
                 .AsNoTracking()
                 .Where(x => x.IdInspeccion == id && !x.Deleted)
-                .OrderBy(x => x.Fecha)
+                .OrderBy(x => x.FechaProgramada)
                 .Select(Globals.BuildSelector<Inspeccion, Inspeccion>(fields))
                 .ToListAsync<dynamic>();
         }
@@ -384,7 +384,7 @@ namespace API.Inspecciones.Services
         public async Task<List<dynamic>> Predictive(dynamic data)
         {
             // INCLUDES
-            string fields = "IdInspeccion,Folio,Fecha,IdBase,BaseName,IdInspeccionEstatus,InspeccionEstatusName,IdRequerimiento,RequerimientoFolio,IdUnidad,UnidadNumeroEconomico,IsUnidadTemporal,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,Locacion,AnioEquipo,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
+            string fields = "IdInspeccion,Folio,FechaProgramada,IdBase,BaseName,IdInspeccionEstatus,InspeccionEstatusName,IdRequerimiento,RequerimientoFolio,IdUnidad,UnidadNumeroEconomico,IsUnidadTemporal,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,Locacion,AnioEquipo,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
 
             // QUERY
             var lstItems = _context.Inspecciones
@@ -416,7 +416,7 @@ namespace API.Inspecciones.Services
                 {
                     IdInspeccion            = item.IdInspeccion,
                     Folio                   = item.Folio,
-                    Fecha                   = item.Fecha,
+                    FechaProgramada         = item.FechaProgramada,
                     IdBase                  = item.IdBase,
                     BaseName                = item.BaseName,
                     IdInspeccionEstatus     = item.IdInspeccionEstatus,

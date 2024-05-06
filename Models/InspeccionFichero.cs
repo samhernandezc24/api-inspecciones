@@ -13,5 +13,6 @@ namespace API.Inspecciones.Models
         // INSPECCION
         public virtual Inspeccion Inspeccion { get; set; }
         public string IdInspeccion { get; set; }
+        public string InspeccionFolio { get; set; }
     }
 }

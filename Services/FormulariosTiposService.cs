@@ -22,7 +22,6 @@ namespace API.Inspecciones.Services
                             {
                                 IdFormularioTipo   = x.IdFormularioTipo,
                                 Name               = x.Name,
-                                Descripcion        = x.Descripcion,
                             })
                             .ToListAsync<dynamic>();
         }

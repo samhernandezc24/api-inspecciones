@@ -41,7 +41,7 @@ namespace API.Inspecciones.Services
             if (!isParcial) { objInspeccion.Evaluado = true; }
 
             objInspeccion.FechaEvaluacion   = DateTime.Now;
-            objInspeccion.isSatisfactorio   = isSatisfactorio;
+            //objInspeccion.isSatisfactorio   = isSatisfactorio;
             objInspeccion.SetUpdated(objUser);
 
             List<InspeccionCategoria> rangeCategoria = new List<InspeccionCategoria>();

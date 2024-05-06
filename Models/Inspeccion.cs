@@ -8,11 +8,17 @@ namespace API.Inspecciones.Models
     {
         [Key]
         public string IdInspeccion { get; set; }
+
+        // REQUERIMIENTO
+        public string IdRequerimiento { get; set; }
+        public string RequerimientoFolio { get; set; }
+        public bool HasRequerimiento => !string.IsNullOrEmpty(RequerimientoFolio);
+
         public string Folio { get; set; }
 
         // FECHA PROGRAMADA
-        public DateTime Fecha { get; set; }
-        public string FechaNatural => Fecha.ToString("dd/MM/yyyy hh:mm tt");
+        public DateTime FechaProgramada { get; set; }
+        public string FechaProgramadaNatural => FechaProgramada.ToString("dd/MM/yyyy hh:mm tt");
 
         // INSPECCIÓN INICIAL
         public DateTime? FechaInspeccionInicial { get; set; }
@@ -32,18 +38,13 @@ namespace API.Inspecciones.Models
         // INSPECCION ESTATUS
         public virtual InspeccionEstatus InspeccionEstatus { get; set; }
         public string IdInspeccionEstatus { get; set; }
-        public string InspeccionEstatusName { get; set; }
+        public string InspeccionEstatusName { get; set; }                
 
         // INSPECCION TIPO
         public virtual InspeccionTipo InspeccionTipo { get; set; }
         public string IdInspeccionTipo { get; set; }
         public string InspeccionTipoCodigo { get; set; }
-        public string InspeccionTipoName { get; set; }
-
-        // REQUERIMIENTO
-        public string IdRequerimiento { get; set; }
-        public string RequerimientoFolio { get; set; }
-        public bool HasRequerimiento => !string.IsNullOrEmpty(RequerimientoFolio);
+        public string InspeccionTipoName { get; set; }      
 
         // BASE
         public string IdBase { get; set; }
@@ -80,23 +81,20 @@ namespace API.Inspecciones.Models
         public string IdUnidadCapacidadMedida { get; set; }
         public string UnidadCapacidadMedidaName { get; set; }
 
-        public int? Odometro { get; set; }
-        public int? Horometro { get; set; }
+        // DATOS DE EVALUACIÓN
+        public DateTime? FechaEvaluacion { get; set; }
+        public bool Evaluado { get; set; }        
 
-        // LOCACION INSPECCION
         public string Locacion { get; set; }
         public string TipoPlataforma { get; set; }
 
-        // EVALUACIÓN
-        public bool isSatisfactorio { get; set; }
-        public DateTime? FechaEvaluacion { get; set; }
-        public bool Evaluado { get; set; }
+        public int? Odometro { get; set; }
+        public int? Horometro { get; set; }
 
         public string Observaciones { get; set; }
 
         public string FirmaOperador { get; set; }
         public string FirmaVerificador { get; set; }
-        public DateTime? FechaFirma { get; set; }
 
         public virtual List<InspeccionCategoria> InspeccionesCategorias { get; set; }
         public virtual List<InspeccionFichero> InspeccionesFicheros { get; set; }

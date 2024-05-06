@@ -12,14 +12,14 @@ namespace API.Inspecciones.Models
         // CATEGORIA
         public virtual Categoria Categoria { get; set; }
         public string IdCategoria {  get; set; }
-        public string CategoriaName { get; set; }
-        
-        public int Orden {  get; set; }
+        public string CategoriaName { get; set; }               
         
         // FORMULARIO TIPO
         public virtual FormularioTipo FormularioTipo { get; set; }
         public string IdFormularioTipo { get; set; }
         public string FormularioTipoName { get; set; }
+
+        public int Orden { get; set; }
 
         public string FormularioValor { get; set; }
 

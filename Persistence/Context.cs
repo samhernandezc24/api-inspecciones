@@ -22,6 +22,7 @@ namespace API.Inspecciones.Persistence
             // INSPECCIONES
             modelBuilder.Entity<Inspeccion>().HasIndex(item => item.Folio).IsUnique();
             modelBuilder.Entity<Inspeccion>().HasOne(item => item.InspeccionEstatus).WithMany(item => item.Inspecciones).HasForeignKey(item => item.IdInspeccionEstatus).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Inspeccion>().HasOne(item => item.InspeccionTipo).WithMany(item => item.Inspecciones).HasForeignKey(item => item.IdInspeccionTipo).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Inspeccion>().HasOne(item => item.UnidadCapacidadMedida).WithMany(item => item.Inspecciones).HasForeignKey(item => item.IdUnidadCapacidadMedida).OnDelete(DeleteBehavior.Restrict);
 
             // INSPECCIONES CATEGORIAS
@@ -41,6 +42,7 @@ namespace API.Inspecciones.Persistence
 
             // UNIDADES (TEMPORALES)
             modelBuilder.Entity<Unidad>().HasIndex(item => item.NumeroEconomico).IsUnique();
+            modelBuilder.Entity<Unidad>().HasOne(item => item.UnidadCapacidadMedida).WithMany(item => item.Unidades).HasForeignKey(item => item.IdUnidadCapacidadMedida).OnDelete(DeleteBehavior.Restrict);
         }
 
         // C
