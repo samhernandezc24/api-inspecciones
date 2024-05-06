@@ -46,7 +46,7 @@ namespace API.Inspecciones.Controllers
                 } 
                 else
                 {
-                    lstCategorias = await _categoriasService.ListEvaluacion(objModel.IdInspeccionTipo);
+                    //lstCategorias = await _categoriasService.ListEvaluacion(objModel.IdInspeccionTipo);
                 }
 
                 objReturn.Result = new

@@ -1,7 +1,7 @@
-﻿using System.Security.Claims;
-using API.Inspecciones.Models;
+﻿using API.Inspecciones.Models;
 using API.Inspecciones.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Workcube.Interfaces;
 using Workcube.Libraries;
 
@@ -20,30 +20,31 @@ namespace API.Inspecciones.Services
         {
             var objTransaction = _context.Database.BeginTransaction();
 
-            string idCategoria          = Globals.ParseGuid(data.idCategoria);
-            bool categoriasItemsExist   = await _context.CategoriasItems.AnyAsync(x => x.IdCategoria == idCategoria && !x.Deleted);
-            int categoriaItemNuevoOrden = 1;
+            string idCategoria = Globals.ParseGuid(data.idCategoria);
 
-            if (categoriasItemsExist)
-            {
-                int categoriaItemLastOrden = await _context.CategoriasItems.Where(x => x.IdCategoria == idCategoria && !x.Deleted).MaxAsync(x => (int?)x.Orden) ?? 0;
-                categoriaItemNuevoOrden = categoriaItemLastOrden + 1;
-            }
+            // Obtener todas las preguntas existentes para la categoria dada.
+            var lstCategoriasItems = await _context.CategoriasItems
+                                        .Where(x => x.IdCategoria == idCategoria && !x.Deleted)
+                                        .OrderBy(x => x.Orden)
+                                        .ToListAsync();
 
-            // GUARDAR CATEGORÍA ITEM
+            // Determinar el nuevo valor de orden para la nueva pregunta.
+            int newOrdenValue = lstCategoriasItems.Count > 0 ? lstCategoriasItems.Max(x => x.Orden) + 1 : 1;
+
+            // GUARDAR CATEGORIA ITEM
             CategoriaItem objModel = new CategoriaItem();
+
             objModel.IdCategoriaItem        = Guid.NewGuid().ToString();
             objModel.Name                   = "Pregunta";
-            objModel.IdCategoria            = Globals.ParseGuid(data.idCategoria);
+            objModel.IdCategoria            = idCategoria;
             objModel.CategoriaName          = Globals.ToUpper(data.categoriaName);
-            objModel.Orden                  = categoriaItemNuevoOrden;
             objModel.IdFormularioTipo       = "ea52bdfd-8af6-4f5a-b182-2b99e554eb32";
             objModel.FormularioTipoName     = "Opción múltiple";
+            objModel.Orden                  = newOrdenValue;
             objModel.FormularioValor        = "Sí,No";
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.CategoriasItems.Add(objModel);
-
             await _context.SaveChangesAsync();
             objTransaction.Commit();
         }
@@ -52,30 +53,31 @@ namespace API.Inspecciones.Services
         {
             var objTransaction = _context.Database.BeginTransaction();
 
-            string idCategoria          = Globals.ParseGuid(data.idCategoria);
-            bool categoriasItemsExist   = await _context.CategoriasItems.AnyAsync(x => x.IdCategoria == idCategoria && !x.Deleted);
-            int categoriaItemNuevoOrden = 1;
+            string idCategoria = Globals.ParseGuid(data.idCategoria);
 
-            if (categoriasItemsExist)
-            {
-                int categoriaItemLastOrden = await _context.CategoriasItems.Where(x => x.IdCategoria == idCategoria && !x.Deleted).MaxAsync(x => (int?)x.Orden) ?? 0;
-                categoriaItemNuevoOrden = categoriaItemLastOrden + 1;
-            }
+            // Obtener todas las preguntas existentes para la categoria dada.
+            var lstCategoriasItems = await _context.CategoriasItems
+                                        .Where(x => x.IdCategoria == idCategoria && !x.Deleted)
+                                        .OrderBy(x => x.Orden)
+                                        .ToListAsync();
 
-            // GUARDAR CATEGORÍA ITEM DUPLICADA
+            // Determinar el nuevo valor de orden para la nueva pregunta.
+            int newOrdenValue = lstCategoriasItems.Count > 0 ? lstCategoriasItems.Max(x => x.Orden) + 1 : 1;
+
+            // DUPLICAR CATEGORIA ITEM
             CategoriaItem objModel = new CategoriaItem();
+
             objModel.IdCategoriaItem        = Guid.NewGuid().ToString();
             objModel.Name                   = Globals.ToString(data.name);
-            objModel.IdCategoria            = Globals.ParseGuid(data.idCategoria);
+            objModel.IdCategoria            = idCategoria;
             objModel.CategoriaName          = Globals.ToUpper(data.categoriaName);
-            objModel.Orden                  = categoriaItemNuevoOrden;
             objModel.IdFormularioTipo       = Globals.ParseGuid(data.idFormularioTipo);
             objModel.FormularioTipoName     = Globals.ToString(data.formularioTipoName);
+            objModel.Orden                  = newOrdenValue;
             objModel.FormularioValor        = Globals.ToString(data.formularioValor);
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.CategoriasItems.Add(objModel);
-
             await _context.SaveChangesAsync();
             objTransaction.Commit();
         }
@@ -87,20 +89,20 @@ namespace API.Inspecciones.Services
 
         public async Task Delete(dynamic data, ClaimsPrincipal user)
         {
-             var objTransaction = _context.Database.BeginTransaction();
+            var objTransaction = _context.Database.BeginTransaction();
 
             string idCategoria      = Globals.ParseGuid(data.idCategoria);
             string idCategoriaItem  = Globals.ParseGuid(data.idCategoriaItem);
 
-            // ENCONTRAR UNA CATEGORÍA ITEM PARA ELIMINAR
+            // ENCONTRAR CATEGORIA ITEM A ELIMINAR
             CategoriaItem objModel = await Find(idCategoriaItem);
 
-            if (objModel == null) { throw new ArgumentException("No se ha encontrado la pregunta solicitada."); }
+            if (objModel == null) { throw new ArgumentException("No se encontró la pregunta."); }
             if (objModel.Deleted) { throw new ArgumentException("La pregunta ya fue eliminada anteriormente."); }
 
-            // ELIMINAR CATEGORÍA ITEM
-            objModel.Deleted    = true;
-            objModel.Orden      = 0;
+            // ELIMINAR CATEGORIA ITEM
+            objModel.Deleted = true;
+            objModel.Orden = 0;
             objModel.SetUpdated(Globals.GetUser(user));
 
             _context.SaveChanges();
@@ -115,7 +117,6 @@ namespace API.Inspecciones.Services
             }
 
             _context.CategoriasItems.Update(objModel);
-
             await _context.SaveChangesAsync();
             objTransaction.Commit();
         }
@@ -148,9 +149,9 @@ namespace API.Inspecciones.Services
                                 Name                = x.Name,
                                 IdCategoria         = x.IdCategoria,
                                 CategoriaName       = x.CategoriaName,
-                                Orden               = x.Orden,
                                 IdFormularioTipo    = string.IsNullOrEmpty(x.IdFormularioTipo) ? "" : x.IdFormularioTipo,
                                 FormularioTipoName  = x.FormularioTipoName,
+                                Orden               = x.Orden,
                                 FormularioValor     = x.FormularioValor,
                                 IsEdit              = false,
                             })
@@ -166,15 +167,15 @@ namespace API.Inspecciones.Services
         {
             var objTransaction = _context.Database.BeginTransaction();
 
-            string idCategoriaItem      = Globals.ParseGuid(data.idCategoriaItem);
+            string idCategoriaItem  = Globals.ParseGuid(data.idCategoriaItem);
 
-            // ENCONTRAR UNA CATEGORÍA ITEM PARA ACTUALIZAR
+            // ENCONTRAR CATEGORIA ITEM A ACTUALIZAR
             CategoriaItem objModel = await Find(idCategoriaItem);
 
-            if (objModel == null) { throw new ArgumentException("No se ha encontrado la pregunta solicitada."); }
-            if (objModel.Deleted) { throw new ArgumentException("La pregunta ya fue eliminada anteriormente."); }                     
+            if (objModel == null) { throw new ArgumentException("No se encontró la pregunta."); }
+            if (objModel.Deleted) { throw new ArgumentException("La pregunta ha sido eliminada."); }
 
-            // ACTUALIZAR CATEGORÍA ITEM         
+            // ACTUALIZAR CATEGORIA ITEM
             objModel.Name                   = Globals.ToString(data.name);
             objModel.IdFormularioTipo       = Globals.ParseGuid(data.idFormularioTipo);
             objModel.FormularioTipoName     = Globals.ToString(data.formularioTipoName);
@@ -182,7 +183,6 @@ namespace API.Inspecciones.Services
             objModel.SetUpdated(Globals.GetUser(user));
 
             _context.CategoriasItems.Update(objModel);
-
             await _context.SaveChangesAsync();
             objTransaction.Commit();
         }

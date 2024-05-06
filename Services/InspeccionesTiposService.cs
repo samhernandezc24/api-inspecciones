@@ -44,7 +44,6 @@ namespace API.Inspecciones.Services
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.InspeccionesTipos.Add(objModel);
-
             await _context.SaveChangesAsync();
             objTransaction.Commit();
         }
@@ -83,7 +82,6 @@ namespace API.Inspecciones.Services
             }
 
             _context.InspeccionesTipos.Update(objModel);
-
             await _context.SaveChangesAsync();
             objTransaction.Commit();
         }
@@ -141,8 +139,8 @@ namespace API.Inspecciones.Services
 
             if (editCodigo || editName) 
             {
-                bool findCodigo     = await _context.InspeccionesTipos.AnyAsync(x => x.Codigo.ToUpper() == codigo && !x.Deleted);
-                bool findName       = await _context.InspeccionesTipos.AnyAsync(x => x.Name.ToUpper() == name && !x.Deleted);
+                bool findCodigo     = await _context.InspeccionesTipos.AnyAsync(x => x.Codigo.ToUpper() == codigo && x.IdInspeccionTipo != idInspeccionTipo && !x.Deleted);
+                bool findName       = await _context.InspeccionesTipos.AnyAsync(x => x.Name.ToUpper() == name && x.IdInspeccionTipo != idInspeccionTipo && !x.Deleted);
 
                 if (findCodigo) { throw new ArgumentException("Ya existe un tipo de inspección con ese código."); }
                 if (findName) { throw new ArgumentException("Ya existe un tipo de inspección con ese nombre."); }            
@@ -155,7 +153,6 @@ namespace API.Inspecciones.Services
             objModel.SetUpdated(Globals.GetUser(user));
 
             _context.InspeccionesTipos.Update(objModel);
-
             await _context.SaveChangesAsync();
             objTransaction.Commit();
         }

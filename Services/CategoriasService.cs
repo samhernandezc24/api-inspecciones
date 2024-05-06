@@ -21,32 +21,31 @@ namespace API.Inspecciones.Services
             var objTransaction = _context.Database.BeginTransaction();
 
             string idInspeccionTipo = Globals.ParseGuid(data.idInspeccionTipo);
-            string categoriaName    = Globals.ToUpper(data.name);
+            string name = Globals.ToUpper(data.name);
 
-            bool categoriasExist    = await _context.Categorias.AnyAsync(x => x.IdInspeccionTipo == idInspeccionTipo && !x.Deleted);
+            // Obtener todas las categorias existentes para el tipo de inspeccion dado.
+            var lstCategorias = await _context.Categorias
+                                        .Where(x => x.IdInspeccionTipo == idInspeccionTipo && !x.Deleted)
+                                        .OrderBy(x => x.Orden)
+                                        .ToListAsync();
 
-            int categoriaNuevoOrden = 1;
-            if (categoriasExist)
-            {
-                int categoriaLastOrden = await _context.Categorias.Where(x => x.IdInspeccionTipo == idInspeccionTipo && !x.Deleted).MaxAsync(x => (int?)x.Orden) ?? 0;
-                categoriaNuevoOrden = categoriaLastOrden + 1;
-            }
+            // Determinar el nuevo valor de orden para la nueva categoría.
+            int newOrdenValue = lstCategorias.Count > 0 ? lstCategorias.Max(x => x.Orden) + 1 : 1;
 
-            bool findCategoriaName  = await _context.Categorias.AnyAsync(x => x.Name.ToUpper() == categoriaName && x.IdInspeccionTipo == idInspeccionTipo && !x.Deleted);
-            if (findCategoriaName) { throw new ArgumentException("Ya existe una categoría con ese nombre."); }
+            if (lstCategorias.Any(x => x.Name.ToUpper() == name)) { throw new ArgumentException("Ya existe una categoría con ese nombre."); }
 
-            // GUARDAR CATEGORÍA
+            // GUARDAR CATEGORIA
             Categoria objModel = new Categoria();
+
             objModel.IdCategoria            = Guid.NewGuid().ToString();
-            objModel.Name                   = categoriaName;
+            objModel.Name                   = name;
             objModel.IdInspeccionTipo       = idInspeccionTipo;
             objModel.InspeccionTipoCodigo   = Globals.ToUpper(data.inspeccionTipoCodigo);
             objModel.InspeccionTipoName     = Globals.ToUpper(data.inspeccionTipoName);
-            objModel.Orden                  = categoriaNuevoOrden;
+            objModel.Orden                  = newOrdenValue;
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.Categorias.Add(objModel);
-
             await _context.SaveChangesAsync();
             objTransaction.Commit();
         }
@@ -58,20 +57,20 @@ namespace API.Inspecciones.Services
 
         public async Task Delete(dynamic data, ClaimsPrincipal user)
         {
-             var objTransaction = _context.Database.BeginTransaction();
+            var objTransaction = _context.Database.BeginTransaction();
 
-            string idInspeccionTipo = Globals.ParseGuid(data.idInspeccionTipo);
-            string idCategoria      = Globals.ParseGuid(data.idCategoria);
+            string idInspeccionTipo     = Globals.ParseGuid(data.idInspeccionTipo);
+            string idCategoria          = Globals.ParseGuid(data.idCategoria);
 
-            // ENCONTRAR UNA CATEGORÍA PARA ELIMINAR
+            // ENCONTRAR CATEGORIA A ELIMINAR
             Categoria objModel = await Find(idCategoria);
 
-            if (objModel == null) { throw new ArgumentException("No se ha encontrado la categoría solicitada."); }
+            if (objModel == null) { throw new ArgumentException("No se encontró la categoría."); }
             if (objModel.Deleted) { throw new ArgumentException("La categoría ya fue eliminada anteriormente."); }
 
-            // ELIMINAR CATEGORÍA
-            objModel.Deleted    = true;
-            objModel.Orden      = 0;
+            // ELIMINAR CATEGORIA
+            objModel.Deleted = true;
+            objModel.Orden = 0;
             objModel.SetUpdated(Globals.GetUser(user));
 
             _context.SaveChanges();
@@ -86,7 +85,6 @@ namespace API.Inspecciones.Services
             }
 
             _context.Categorias.Update(objModel);
-
             await _context.SaveChangesAsync();
             objTransaction.Commit();
         }
@@ -99,7 +97,7 @@ namespace API.Inspecciones.Services
         public async Task<Categoria> FindSelectorById(string id, string fields)
         {
             return await _context.Categorias.AsNoTracking().Where(x => x.IdCategoria == id)
-                        .Select(Globals.BuildSelector<Categoria, Categoria>(fields)).FirstOrDefaultAsync();
+                            .Select(Globals.BuildSelector<Categoria, Categoria>(fields)).FirstOrDefaultAsync();
         }
 
         public Task<List<dynamic>> List()
@@ -125,30 +123,6 @@ namespace API.Inspecciones.Services
                             .ToListAsync<dynamic>();
         }
 
-        public async Task<List<dynamic>> ListEvaluacion(string idInspeccionTipo)
-        {
-            return await _context.Categorias
-                            .AsNoTracking()
-                            .Where(x => x.IdInspeccionTipo == idInspeccionTipo && !x.Deleted)
-                            .OrderBy(x => x.Orden)
-                            .Select(x => new
-                            {
-                                IdCategoria         = x.IdCategoria,
-                                Name                = x.Name,
-                                //TotalItems          = x.CategoriasItems.Where(d => !d.Deleted && d.IdFormularioTipo == "wef").Count(),
-                                CategoriasItems     = x.CategoriasItems.Where(d => !d.Deleted)
-                                                        .OrderBy(d => d.Orden)
-                                                        .Select(d => new
-                                                        {
-                                                            IdCategoriaItem     = d.IdCategoriaItem,
-                                                            Name                = d.Name,
-                                                            IdFormularioTipo    = d.IdFormularioTipo,
-                                                            FormularioTipoName  = d.FormularioTipoName,
-                                                        }).ToList()
-                            })
-                            .ToListAsync<dynamic>();
-        }
-
         public Task<byte[]> Reporte(dynamic data)
         {
             throw new NotImplementedException();
@@ -158,29 +132,30 @@ namespace API.Inspecciones.Services
         {
             var objTransaction = _context.Database.BeginTransaction();
 
-            string idCategoria      = Globals.ParseGuid(data.idCategoria);
-            string categoriaName    = Globals.ToUpper(data.name);
+            string idInspeccionTipo     = Globals.ParseGuid(data.idInspeccionTipo);
+            string idCategoria          = Globals.ParseGuid(data.idCategoria);
 
-            // ENCONTRAR UNA CATEGORÍA PARA ACTUALIZAR
+            string name = Globals.ToUpper(data.name);
+
+            // ENCONTRAR CATEGORIA A ACTUALIZAR
             Categoria objModel = await Find(idCategoria);
 
-            if (objModel == null) { throw new ArgumentException("No se ha encontrado la categoría solicitada."); }
-            if (objModel.Deleted) { throw new ArgumentException("La categoría ya fue eliminada anteriormente."); }
+            if (objModel == null) { throw new ArgumentException("No se encontró la categoría."); }
+            if (objModel.Deleted) { throw new ArgumentException("La categoría ha sido eliminada."); }
 
-            bool isNameModified = !string.Equals(objModel.Name, categoriaName, StringComparison.OrdinalIgnoreCase);
+            bool editName = !string.Equals(objModel.Name, name, StringComparison.OrdinalIgnoreCase);
 
-            if (isNameModified)
+            if (editName)
             {
-                bool findCategoriaName = await _context.Categorias.AnyAsync(x => x.Name.ToUpper() == categoriaName && x.IdCategoria != idCategoria && !x.Deleted);
-                if (findCategoriaName) { throw new ArgumentException("Ya existe una categoría con ese nombre."); }
-            }                        
+                bool findName = await _context.Categorias.AnyAsync(x => x.Name.ToUpper() == name && x.IdCategoria != idCategoria && x.IdInspeccionTipo == idInspeccionTipo && !x.Deleted);
+                if (findName) { throw new ArgumentException("Ya existe una categoría con ese nombre."); }
+            }
 
-            // ACTUALIZAR CATEGORÍA       
-            objModel.Name = categoriaName;
+            // ACTUALIZAR CATEGORIA
+            objModel.Name = name;
             objModel.SetUpdated(Globals.GetUser(user));
 
             _context.Categorias.Update(objModel);
-
             await _context.SaveChangesAsync();
             objTransaction.Commit();
         }
