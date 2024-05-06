@@ -12,12 +12,56 @@ namespace API.Inspecciones.Controllers
     public class InspeccionesController : ControllerBase
     {
         private readonly InspeccionesService _inspeccionesService;
+        private readonly InspeccionesEstatusService _inspeccionesEstatusService;
         private readonly InspeccionesTiposService _inspeccionesTiposService;
+        private readonly UnidadesCapacidadesMedidadesService _unidadesCapacidadesMedidadesService;
 
-        public InspeccionesController(InspeccionesService inspeccionesService, InspeccionesTiposService inspeccionesTipos)
+        public InspeccionesController(InspeccionesService inspeccionesService, InspeccionesEstatusService inspeccionesEstatusService, 
+                                    InspeccionesTiposService inspeccionesTiposService, UnidadesCapacidadesMedidadesService unidadesCapacidadesMedidadesService)
         {
-            _inspeccionesService        = inspeccionesService;
-            _inspeccionesTiposService   = inspeccionesTipos;
+            _inspeccionesService                    = inspeccionesService;
+            _inspeccionesEstatusService             = inspeccionesEstatusService;
+            _inspeccionesTiposService               = inspeccionesTiposService;
+            _unidadesCapacidadesMedidadesService    = unidadesCapacidadesMedidadesService;
+        }
+
+        [HttpPost("Index")]
+        [Authorize]
+        public async Task<ActionResult<dynamic>> Index()
+        {
+            JsonReturn objReturn = new JsonReturn();
+
+            try
+            {
+                var lstUnidadesTipos = await HttpReq.Post("unidades", "unidades/tipos/List");
+
+                List<dynamic> lstInspeccionesEstatus        = await _inspeccionesEstatusService.List();
+                List<dynamic> lstUnidadesCapacidadesMedidas = await _unidadesCapacidadesMedidadesService.List();
+                List<dynamic> lstUsuarios                   = await _inspeccionesService.ListUsuarios();
+
+                var dataSourcePersistence = await HttpReq.Post("account", "DataSourcePersistence/find", Globals.TableDataSource("Inspecciones", User));
+
+                objReturn.Result = new
+                {
+                    dataSourcePersistence       = dataSourcePersistence,
+                    UnidadesTipos               = lstUnidadesTipos,
+                    InspeccionesEstatus         = lstInspeccionesEstatus,
+                    UnidadesCapacidadesMedidas  = lstUnidadesCapacidadesMedidas,
+                    Usuarios                    = lstUsuarios,
+                };
+
+                objReturn.Success(SuccessMessage.REQUEST);
+            }
+            catch (AppException ex)
+            {
+                objReturn.Exception(ex);
+            }
+            catch (Exception ex)
+            {
+                objReturn.Exception(ExceptionMessage.RawException(ex));
+            }
+
+            return objReturn.build();
         }
 
         [HttpPost("DataSource")]
@@ -56,7 +100,7 @@ namespace API.Inspecciones.Controllers
 
                 objReturn.Result = new
                 {
-                    InspeccionesTipos   = lstInspeccionesTipos,
+                    InspeccionesTipos = lstInspeccionesTipos,
                 };
 
                 objReturn.Success(SuccessMessage.REQUEST);
@@ -98,17 +142,18 @@ namespace API.Inspecciones.Controllers
             return objReturn.build();
         }
 
-        [HttpPost("PredictiveEOS")]
+        [HttpPost("Finish")]
         [Authorize]
-        public async Task<ActionResult<dynamic>> PredictiveEOS(JsonObject data)
+        public async Task<ActionResult<dynamic>> Finish(JsonObject data)
         {
             JsonReturn objReturn = new JsonReturn();
 
             try
             {
-                objReturn.Result = await _inspeccionesService.Predictive(Globals.JsonData(data));
+                await _inspeccionesService.Finish(Globals.JsonData(data), User);
 
-                objReturn.Success(SuccessMessage.REQUEST);
+                objReturn.Title     = "Finalizado";
+                objReturn.Message   = "La inspección se ha finalizado exitosamente";
             }
             catch (AppException ex)
             {
@@ -133,7 +178,7 @@ namespace API.Inspecciones.Controllers
                 await _inspeccionesService.Cancel(Globals.JsonData(data), User);
 
                 objReturn.Title     = "Cancelado";
-                objReturn.Message   = "La inspección ha sido cancelada exitosamente";
+                objReturn.Message   = "La inspección se ha cancelado exitosamente";
             }
             catch (AppException ex)
             {
@@ -147,39 +192,31 @@ namespace API.Inspecciones.Controllers
             return objReturn.build();
         }
 
-        [HttpPost("Finish")]
-        [Authorize]
-        public async Task<ActionResult<dynamic>> Finish(JsonObject data)
+        // EXTERNAL MICROSERVICIOS
+        [HttpPost("List")]
+        public async Task<ActionResult<List<dynamic>>> List()
         {
-            JsonReturn objReturn = new JsonReturn();
-
             try
             {
-                await _inspeccionesService.Finish(Globals.JsonData(data), User);
-
-                objReturn.Title     = "Finalizado";
-                objReturn.Message   = "La inspección ha sido finalizada exitosamente";
-            }
-            catch (AppException ex)
-            {
-                objReturn.Exception(ex);
+                return await _inspeccionesService.List();
             }
             catch (Exception ex)
             {
-                objReturn.Exception(ExceptionMessage.RawException(ex));
+                return BadRequest(ex.Message);
             }
-
-            return objReturn.build();
         }
 
-        // EXTERNAL APIS
-        [HttpPost("StoreFromRequerimientos")]
-        public async Task<ActionResult<dynamic>> StoreFromRequerimientos(JsonObject data)
+        [HttpPost("ListSelector")]
+        public async Task<ActionResult<List<dynamic>>> ListSelector(JsonObject data)
         {
             try
             {
-                await _inspeccionesService.CreateFromRequerimientos(Globals.JsonData(data), User);
-                return true;
+                var argData = Globals.JsonData(data);
+
+                string idInspeccion = Globals.ParseGuid(argData.idInspeccion);
+                string fields = Globals.ToString(argData.fields);
+
+                return await _inspeccionesService.ListSelector(idInspeccion, fields);
             }
             catch (Exception ex)
             {
@@ -192,33 +229,15 @@ namespace API.Inspecciones.Controllers
         {
             try
             {
-                dynamic argData = Globals.JsonData(data);
+                var argData = Globals.JsonData(data);
 
-                string id = Globals.ParseGuid(argData.idInspeccion);
+                string idInspeccion = Globals.ParseGuid(argData.idInspeccion);
 
-                return await _inspeccionesService.Find(id);
+                return await _inspeccionesService.Find(idInspeccion);
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                return BadRequest(exception.Message);
-            }
-        }
-
-        [HttpPost("FindSelector")]
-        public async Task<ActionResult<dynamic>> FindSelector(JsonObject data)
-        {
-            try
-            {
-                dynamic argData = Globals.JsonData(data);
-
-                string id       = Globals.ParseGuid(argData.idInspeccion);
-                string fields   = Globals.ToString(argData.fields);
-
-                return await _inspeccionesService.FindSelectorById(id, fields);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(exception.Message);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -233,44 +252,42 @@ namespace API.Inspecciones.Controllers
 
                 return await _inspeccionesService.FindLastByIds(lstIds);
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-
-                return BadRequest(exception.Message);
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpPost("List")]
-        public async Task<ActionResult<List<dynamic>>> List()
+        [HttpPost("FindSelector")]
+        public async Task<ActionResult<dynamic>> FindSelector(JsonObject data)
         {
             try
             {
-                return await _inspeccionesService.List();
-            }
-            catch (Exception exception)
-            {
-
-                return BadRequest(exception.Message);
-            }
-        }
-
-        [HttpPost("ListSelector")]
-        public async Task<ActionResult<List<dynamic>>> ListSelector(JsonObject data)
-        {
-            try
-            {
-                dynamic argData = Globals.JsonData(data);
+                var argData = Globals.JsonData(data);
 
                 string idInspeccion     = Globals.ParseGuid(argData.idInspeccion);
                 string fields           = Globals.ToString(argData.fields);
 
-                return await _inspeccionesService.ListSelector(idInspeccion, fields);
+                return await _inspeccionesService.FindSelectorById(idInspeccion, fields);
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-
-                return BadRequest(exception.Message);
+                return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("StoreFromRequerimientos")]
+        public async Task<ActionResult<dynamic>> StoreFromRequerimientos(JsonObject data)
+        {
+            try
+            {
+                await _inspeccionesService.CreateFromRequerimientos(Globals.JsonData(data), User);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }        
     }
 }
