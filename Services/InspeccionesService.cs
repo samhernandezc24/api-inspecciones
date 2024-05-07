@@ -290,12 +290,12 @@ namespace API.Inspecciones.Services
 
             lstRows = (orderDirection == "asc") ? lstRows.OrderBy(sortExpression) : lstRows.OrderByDescending(sortExpression);
 
-            string strfields = "IdInspeccion,Folio,FechaProgramada,IdBase,BaseName,IdInspeccionEstatus,InspeccionEstatusName,IdInspeccionTipo,InspeccionTipoCodigo,InspeccionTipoName,IdRequerimiento,RequerimientoFolio,IdUnidad,UnidadNumeroEconomico,IsUnidadTemporal,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,Locacion,AnioEquipo,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
+            string fields = "IdInspeccion,RequerimientoFolio,Folio,FechaProgramada,FechaInspeccionInicial,UserInspeccionInicialName,FechaInspeccionFinal,UserInspeccionFinalName,IdInspeccionEstatus,InspeccionEstatusName,InspeccionTipoCodigo,InspeccionTipoName,BaseName,IdUnidad,UnidadNumeroEconomico,IsUnidadTemporal,UnidadTipoName,UnidadMarcaName,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,AnioEquipo,Capacidad,UnidadCapacidadMedidaName,Evaluado,FechaEvaluacion,Locacion,TipoPlataforma,Odometro,Horometro,Observaciones,FirmaOperador,FirmaVerificador,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
 
             lstItems = lstRows
                         .Where(x => !x.Deleted)
                         .Where(ExpFullWhere)
-                        .Select(Globals.BuildSelector<Inspeccion, Inspeccion>(strfields))
+                        .Select(Globals.BuildSelector<Inspeccion, Inspeccion>(fields))
                         .ProjectTo<InspeccionViewModel>(_mapper.ConfigurationProvider);
 
             return lstItems;

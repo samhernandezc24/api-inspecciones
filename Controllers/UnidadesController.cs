@@ -1,4 +1,6 @@
+using System.Numerics;
 using System.Text.Json.Nodes;
+using API.Inspecciones.Models;
 using API.Inspecciones.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +13,12 @@ namespace API.Inspecciones.Controllers
     public class UnidadesController : ControllerBase
     {
         private readonly UnidadesService _unidadesService;
-        public UnidadesController(UnidadesService unidadesService)
+        private readonly UnidadesCapacidadesMedidadesService _unidadesCapacidadesMedidadesService;
+
+        public UnidadesController(UnidadesService unidadesService, UnidadesCapacidadesMedidadesService unidadesCapacidadesMedidadesService)
         {
-            _unidadesService = unidadesService;
+            _unidadesService                        = unidadesService;
+            _unidadesCapacidadesMedidadesService    = unidadesCapacidadesMedidadesService;
         }
 
         [HttpPost("Index")]
@@ -24,18 +29,18 @@ namespace API.Inspecciones.Controllers
 
             try
             {
-                List<dynamic> lstUsuarios   = await _unidadesService.ListUsuarios();
-                var lstUnidadesMarcas       = await HttpReq.Post("unidades", "unidadesMarcas/List");
-                var lstUnidadesTipos        = await HttpReq.Post("unidades", "unidades/tipos/List");
+                var lstUnidadesMarcas   = await HttpReq.Post("unidades", "unidadesMarcas/List");
+                var lstUnidadesTipos    = await HttpReq.Post("unidades", "unidades/tipos/List");
 
-                var dataSourcePersistence = await HttpReq.Post("account", "DataSourcePersistence/find", Globals.TableDataSource("Unidades", User));
+                List<dynamic> lstUnidadesCapacidadesMedidas = await _unidadesCapacidadesMedidadesService.List();
+                List<dynamic> lstUsuarios                   = await _unidadesService.ListUsuarios();
 
                 objReturn.Result = new
                 {
-                    dataSourcePersistence   = dataSourcePersistence,
-                    Usuarios                = lstUsuarios,
-                    UnidadesMarcas          = lstUnidadesMarcas,
-                    UnidadesTipos           = lstUnidadesTipos,
+                    UnidadesCapacidadesMedidas  = lstUnidadesCapacidadesMedidas,
+                    UnidadesMarcas              = lstUnidadesMarcas,
+                    UnidadesTipos               = lstUnidadesTipos,
+                    Usuarios                    = lstUsuarios,
                 };
 
                 objReturn.Success(SuccessMessage.REQUEST);
@@ -88,11 +93,14 @@ namespace API.Inspecciones.Controllers
                 var lstUnidadesMarcas   = await HttpReq.Post("unidades", "unidadesMarcas/List");
                 var lstUnidadesTipos    = await HttpReq.Post("unidades", "unidades/tipos/List");
 
+                List<dynamic> lstUnidadesCapacidadesMedidas = await _unidadesCapacidadesMedidadesService.List();
+
                 objReturn.Result = new
                 {
-                    Bases           = lstBases,
-                    UnidadesMarcas  = lstUnidadesMarcas,
-                    UnidadesTipos   = lstUnidadesTipos,
+                    Bases                       = lstBases,
+                    UnidadesCapacidadesMedidas  = lstUnidadesCapacidadesMedidas,
+                    UnidadesMarcas              = lstUnidadesMarcas,
+                    UnidadesTipos               = lstUnidadesTipos,
                 };
 
                 objReturn.Success(SuccessMessage.REQUEST);
@@ -134,17 +142,112 @@ namespace API.Inspecciones.Controllers
             return objReturn.build();
         }
 
-        [HttpPost("PredictiveEOS")]
+        [HttpPost("Edit")]
         [Authorize]
-        public async Task<ActionResult<dynamic>> PredictiveEOS(JsonObject data)
+        public async Task<ActionResult<dynamic>> Edit(JsonObject data)
         {
             JsonReturn objReturn = new JsonReturn();
 
-            List<dynamic> lstRows = await _unidadesService.Predictive(Globals.JsonData(data));
+            try
+            {
+                string idUnidad = Globals.ParseGuid(Globals.JsonData(data).idUnidad);
 
-            objReturn.Result = new { rows = lstRows };
+                Unidad objModel = await _unidadesService.FindSelectorById(idUnidad, "IdUnidad,NumeroEconomico,IdBase,IdUnidadTipo,IdUnidadMarca,IdUnidadPlacaTipo,Placa,NumeroSerie,Modelo,AnioEquipo,Descripcion,Capacidad,IdUnidadCapacidadMedida,Horometro,Odometro");
 
-            objReturn.Success(SuccessMessage.REQUEST);
+                var lstBases            = await HttpReq.Post("catalogos", "bases/List");
+                var lstUnidadesMarcas   = await HttpReq.Post("unidades", "unidadesMarcas/List");
+                var lstUnidadesTipos    = await HttpReq.Post("unidades", "unidades/tipos/List");
+
+                List<dynamic> lstUnidadesCapacidadesMedidas = await _unidadesCapacidadesMedidadesService.List();
+
+                var objUnidad = new
+                {
+                    IdUnidad                    = objModel.IdUnidad,
+                    NumeroEconomico             = objModel.NumeroEconomico,
+                    IdBase                      = objModel.IdBase,
+                    IdUnidadTipo                = objModel.IdUnidadTipo,
+                    IdUnidadMarca               = objModel.IdUnidadMarca,
+                    IdUnidadPlacaTipo           = objModel.IdUnidadPlacaTipo,
+                    Placa                       = objModel.Placa,
+                    NumeroSerie                 = objModel.NumeroSerie,
+                    Modelo                      = objModel.Modelo,
+                    AnioEquipo                  = objModel.AnioEquipo,
+                    Descripcion                 = objModel.Descripcion,
+                    Capacidad                   = objModel.Capacidad,
+                    IdUnidadCapacidadMedida     = objModel.IdUnidadCapacidadMedida,
+                    Horometro                   = objModel.Horometro,
+                    Odometro                    = objModel.Odometro,
+                };
+
+                objReturn.Result = new
+                {
+                    Unidad                      = objUnidad,
+                    Bases                       = lstBases,
+                    UnidadesCapacidadesMedidas  = lstUnidadesCapacidadesMedidas,
+                    UnidadesMarcas              = lstUnidadesMarcas,
+                    UnidadesTipos               = lstUnidadesTipos,
+                };
+
+                objReturn.Success(SuccessMessage.REQUEST);
+            }
+            catch (AppException ex)
+            {
+                objReturn.Exception(ex);
+            }
+            catch (Exception ex)
+            {
+                objReturn.Exception(ExceptionMessage.RawException(ex));
+            }
+
+            return objReturn.build();
+        }
+
+        [HttpPost("Update")]
+        [Authorize]
+        public async Task<ActionResult<dynamic>> Update(JsonObject data)
+        {
+            JsonReturn objReturn = new JsonReturn();
+
+            try
+            {
+                await _unidadesService.Update(Globals.JsonData(data), User);
+
+                objReturn.Title     = "Actualizado";
+                objReturn.Message   = "La unidad se ha actualizado exitosamente";
+            }
+            catch (AppException ex)
+            {
+                objReturn.Exception(ex);
+            }
+            catch (Exception ex)
+            {
+                objReturn.Exception(ExceptionMessage.RawException(ex));
+            }
+
+            return objReturn.build();
+        }
+
+        [HttpPost("Delete")]
+        [Authorize]
+        public async Task<ActionResult<dynamic>> Delete(JsonObject data)
+        {
+            JsonReturn objReturn = new JsonReturn();
+
+            try
+            {
+                await _unidadesService.Delete(Globals.JsonData(data), User);
+
+                objReturn.Title     = "Eliminado";
+                objReturn.Message   = "La unidad se ha eliminado exitosamente";
+            }
+            catch (AppException ex)
+            {
+                objReturn.Exception(ex);
+            }
+            catch (Exception ex)
+            {
+                objReturn.Exception(ExceptionMessage.RawException(ex));
+            }
 
             return objReturn.build();
         }
@@ -158,7 +261,6 @@ namespace API.Inspecciones.Controllers
             try
             {
                 byte[] file = await _unidadesService.Reporte(Globals.JsonData(data));
-
                 objReturn.Result = Globals.GetBase64(file);
 
                 objReturn.Success(SuccessMessage.REQUEST);

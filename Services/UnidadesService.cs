@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using System.Numerics;
 using System.Security.Claims;
 using API.Inspecciones.Models;
 using API.Inspecciones.Persistence;
@@ -19,7 +18,7 @@ namespace API.Inspecciones.Services
         private readonly Context _context;
         private readonly IMapper _mapper;
 
-        public UnidadesService(Context context, IMapper mapper)
+        public UnidadesService(Context context, IMapper mapper) 
         {
             _context    = context;
             _mapper     = mapper;
@@ -29,35 +28,38 @@ namespace API.Inspecciones.Services
         {
             var objTransaction = _context.Database.BeginTransaction();
 
-            string unidadNumeroEconomico = Globals.ToUpper(data.numeroEconomico);
+            string numeroEconomico = Globals.ToUpper(data.numeroEconomico);
 
-            bool findUnidad = await _context.Unidades.AnyAsync(x => x.NumeroEconomico.ToUpper() == unidadNumeroEconomico && !x.Deleted);
-            if (findUnidad) { throw new ArgumentException("Ya existe una unidad con ese mismo número económico."); }
+            bool findUnidad = await _context.Unidades.AnyAsync(x => x.NumeroEconomico.ToUpper() == numeroEconomico && !x.Deleted);
 
-            // GUARDAR UNIDAD TEMPORAL
+            if (findUnidad) { throw new ArgumentException("Ya existe una unidad con ese número ecónomico."); }
+
+            // GUARDAR UNIDAD
             Unidad objModel = new Unidad();
-            objModel.IdUnidad               = Guid.NewGuid().ToString();
-            objModel.NumeroEconomico        = unidadNumeroEconomico;
-            objModel.IdBase                 = Globals.ParseGuid(data.idBase);
-            objModel.BaseName               = Globals.ToUpper(data.baseName);
-            objModel.IdUnidadTipo           = Globals.ParseGuid(data.idUnidadTipo);
-            objModel.UnidadTipoName         = Globals.ToUpper(data.unidadTipoName);
-            objModel.IdUnidadMarca          = Globals.ParseGuid(data.idUnidadMarca);
-            objModel.UnidadMarcaName        = Globals.ToUpper(data.unidadMarcaName);
-            objModel.IdUnidadPlacaTipo      = Globals.ParseGuid(data.idUnidadPlacaTipo);
-            objModel.UnidadPlacaTipoName    = Globals.ToUpper(data.unidadPlacaTipoName);
-            objModel.Placa                  = Globals.ToUpper(data.placa);
-            objModel.NumeroSerie            = Globals.ToUpper(data.numeroSerie);
-            objModel.Modelo                 = Globals.ToUpper(data.modelo);
-            objModel.AnioEquipo             = Globals.ToUpper(data.anioEquipo);            
-            objModel.Descripcion            = Globals.ToUpper(data.descripcion);
-            objModel.Capacidad              = Globals.ParseDecimal(data.capacidad) ?? 0;
-            objModel.Odometro               = Globals.ParseInt(data.odometro) ?? 0;
-            objModel.Horometro              = Globals.ParseInt(data.horometro) ?? 0;
+
+            objModel.IdUnidad                   = Guid.NewGuid().ToString();
+            objModel.NumeroEconomico            = numeroEconomico;
+            objModel.IdBase                     = Globals.ParseGuid(data.idBase);
+            objModel.BaseName                   = Globals.ToUpper(data.baseName);
+            objModel.IdUnidadTipo               = Globals.ParseGuid(data.idUnidadTipo);
+            objModel.UnidadTipoName             = Globals.ToUpper(data.unidadTipoName);
+            objModel.IdUnidadMarca              = Globals.ParseGuid(data.idUnidadMarca);
+            objModel.UnidadMarcaName            = Globals.ToUpper(data.unidadMarcaName);
+            objModel.IdUnidadPlacaTipo          = Globals.ParseGuid(data.idUnidadPlacaTipo);
+            objModel.UnidadPlacaTipoName        = Globals.ToUpper(data.unidadPlacaTipoName);
+            objModel.Placa                      = Globals.ToUpper(data.placa);
+            objModel.NumeroSerie                = Globals.ToUpper(data.numeroSerie);
+            objModel.Modelo                     = Globals.ToUpper(data.modelo);
+            objModel.AnioEquipo                 = Globals.ToUpper(data.anioEquipo);
+            objModel.Descripcion                = Globals.ToUpper(data.descripcion);
+            objModel.Capacidad                  = Globals.ParseDecimal(data.capacidad);
+            objModel.IdUnidadCapacidadMedida    = Globals.ParseGuid(data.idUnidadCapacidadMedida);
+            objModel.UnidadCapacidadMedidaName  = Globals.ToUpper(data.unidadCapacidadMedidaName);
+            objModel.Horometro                  = Globals.ParseInt(data.horometro)  ?? 0;
+            objModel.Odometro                   = Globals.ParseInt(data.odometro)   ?? 0;
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.Unidades.Add(objModel);
-
             await _context.SaveChangesAsync();
             objTransaction.Commit();
         }
@@ -65,11 +67,10 @@ namespace API.Inspecciones.Services
         public async Task<dynamic> DataSource(dynamic data, ClaimsPrincipal user)
         {
             IQueryable<UnidadViewModel> lstItems = DataSourceExpression(data);
-
             DataSourceBuilder<UnidadViewModel> objDataTableBuilder = new DataSourceBuilder<UnidadViewModel>(data, lstItems);
-
             var objDataTableResult = await objDataTableBuilder.build();
 
+            // CONSTRUCCION RETORNO DE DATOS
             List<UnidadViewModel> lstOriginal = objDataTableResult.rows;
             List<dynamic> lstRows = new List<dynamic>();
 
@@ -81,20 +82,31 @@ namespace API.Inspecciones.Services
             {
                 lstRows.Add(new
                 {
-                    index               = index,
-                    IdUnidad            = item.IdUnidad,
-                    NumeroEconomico     = item.NumeroEconomico,
-                    NumeroSerie         = item.NumeroSerie,
-                    Descripcion         = item.Descripcion,
-                    Modelo              = item.Modelo,
-                    AnioEquipo          = item.AnioEquipo,
-                    UnidadMarcaName     = item.UnidadMarcaName,
-                    UnidadTipoName      = item.UnidadTipoName,
-                    Capacidad           = item.Capacidad,
-                    CreatedUserName     = item.CreatedUserName,
-                    CreatedFecha        = item.CreatedFechaNatural,
-                    UpdatedUserName     = item.UpdatedUserName,
-                    UpdatedFecha        = item.UpdatedFechaNatural,
+                    index                           = index,
+                    IdUnidad                        = item.IdUnidad,
+                    NumeroEconomico                 = item.NumeroEconomico,
+                    IdBase                          = item.IdBase,
+                    BaseName                        = item.BaseName,
+                    IdUnidadTipo                    = item.IdUnidadTipo,
+                    UnidadTipoName                  = item.UnidadTipoName,
+                    IdUnidadMarca                   = item.IdUnidadMarca,
+                    UnidadMarcaName                 = item.UnidadMarcaName,
+                    IdUnidadPlacaTipo               = item.IdUnidadPlacaTipo,
+                    UnidadPlacaTipoName             = item.UnidadPlacaTipoName,
+                    Placa                           = item.Placa,
+                    NumeroSerie                     = item.NumeroSerie,
+                    Modelo                          = item.Modelo,
+                    AnioEquipo                      = item.AnioEquipo,
+                    Descripcion                     = item.Descripcion,
+                    Capacidad                       = item.Capacidad,
+                    IdUnidadCapacidadMedida         = item.IdUnidadCapacidadMedida,
+                    UnidadCapacidadMedidaName       = item.UnidadCapacidadMedidaName,
+                    Odometro                        = item.Odometro,
+                    Horometro                       = item.Horometro,
+                    CreatedUserName                 = item.CreatedUserName,
+                    CreatedFechaNatural             = item.CreatedFechaNatural,
+                    UpdatedUserName                 = item.UpdatedUserName,
+                    UpdatedFechaNatural             = item.UpdatedFechaNatural
                 });
                 index++;
             });
@@ -116,93 +128,64 @@ namespace API.Inspecciones.Services
             // INCLUDES
             IQueryable<UnidadViewModel> lstItems;
 
-            // APLICAR FILTROS DINÁMICOS
+            // APLICAR FILTROS DINAMICOS
             // FILTROS
             var filters = new Dictionary<string, Func<string, Expression<Func<Unidad, bool>>>>
             {
-                {"IdCreatedUser",   (strValue) => item => item.IdCreatedUser    == strValue},
-                {"IdUpdatedUser",   (strValue) => item => item.IdUpdatedUser    == strValue},
+                {"IdUnidadMarca",       (strValue) => item => item.IdUnidadMarca    == strValue},
+                {"IdUnidadTipo",        (strValue) => item => item.IdUnidadTipo     == strValue},
+                {"IdCreatedUser",       (strValue) => item => item.IdCreatedUser    == strValue},
+                {"IdUpdatedUser",       (strValue) => item => item.IdUpdatedUser    == strValue},
             };
 
             // FILTROS MULTIPLE
-            var filtersMultiple = new Dictionary<string, Func<string, Expression<Func<Unidad, bool>>>>
-            {
-                {"IdUnidadMarca",   (strValue) => item => item.IdUnidadMarca    == strValue },
-                {"IdUnidadTipo",    (strValue) => item => item.IdUnidadTipo     == strValue },
-            };
+            var filtersMultiple = new Dictionary<string, Func<string, Expression<Func<Unidad, bool>>>> { };
 
             // FILTROS FECHAS
             DateTime? dateFrom  = SourceExpression<Unidad>.Date((string)data.dateFrom);
             DateTime? dateTo    = SourceExpression<Unidad>.Date((string)data.dateTo);
 
             var dates = new Dictionary<string, DateExpression<Unidad>>()
-            {
-                { "CreatedFecha",   new DateExpression<Unidad>{ dateFrom = item => item.CreatedFecha.Date  >= dateFrom, dateTo = item => item.CreatedFecha.Date    <= dateTo } },
-                { "UpdatedFecha",   new DateExpression<Unidad>{ dateFrom = item => item.UpdatedFecha.Date  >= dateFrom, dateTo = item => item.UpdatedFecha.Date    <= dateTo } }
+            {             
+                { "CreatedFecha",   new DateExpression<Unidad>{ dateFrom = item => item.CreatedFecha.Date   >= dateFrom, dateTo = item => item.CreatedFecha.Date    <= dateTo } },
+                { "UpdatedFecha",   new DateExpression<Unidad>{ dateFrom = item => item.UpdatedFecha.Date   >= dateFrom, dateTo = item => item.UpdatedFecha.Date    <= dateTo } }
             };
 
             Expression<Func<Unidad, bool>> ExpFullWhere = SourceExpression<Unidad>.GetExpression(data, filters, dates, filtersMultiple);
 
-            // ORDER BY
-            var orderColumn     = Globals.ToString(data.sort.column);
-            var orderDirection  = Globals.ToString(data.sort.direction);
-
-            Expression<Func<Unidad, object>> sortExpression;
-            switch (orderColumn)
-            {
-                case "numeroEconomico"      : sortExpression = (x => x.NumeroEconomico);        break;
-                case "numeroSerie"          : sortExpression = (x => x.NumeroSerie);            break;
-                case "descripcion"          : sortExpression = (x => x.Descripcion);            break;
-                case "modelo"               : sortExpression = (x => x.Modelo);                 break;
-                case "anioEquipo"           : sortExpression = (x => x.AnioEquipo);             break;
-                case "unidadMarcaName"      : sortExpression = (x => x.UnidadMarcaName);        break;
-                case "unidadTipoName"       : sortExpression = (x => x.UnidadTipoName);         break;
-                case "capacidad"            : sortExpression = (x => x.Capacidad);              break;
-                case "createdUserName"      : sortExpression = (x => x.CreatedUserName);        break;
-                case "createdFechaNatural"  : sortExpression = (x => x.CreatedFechaNatural);    break;
-                case "updatedUserName"      : sortExpression = (x => x.UpdatedUserName);        break;
-                case "updatedFechaNatural"  : sortExpression = (x => x.UpdatedFechaNatural);    break;
-                default                     : sortExpression = (x => x.CreatedFecha);           break;
-            }
-
-            // MAPEAR DATOS
-            List<string> columns = new List<string>();
-
-            columns = Globals.GetArrayColumns(data);
-
-            columns.Add("IdUnidad");
-            columns.Add("NumeroEconomico");
-            columns.Add("NumeroSerie");
-            columns.Add("Descripcion");
-            columns.Add("Modelo");
-            columns.Add("AnioEquipo");
-            columns.Add("UnidadMarcaName");
-            columns.Add("UnidadTipoName");
-            columns.Add("Capacidad");
-            columns.Add("CreatedUserName");
-            columns.Add("CreatedFecha");
-            columns.Add("UpdatedUserName");
-            columns.Add("UpdatedFecha");
-
-            string strColumns = Globals.GetStringColumns(columns);
-
             // COMPLETE
-            IQueryable<Unidad> lstRows = _context.Unidades.AsNoTracking();
+            IQueryable<Unidad> rows = _context.Unidades.AsNoTracking();
 
-            lstRows = (orderDirection == "asc") ? lstRows.OrderBy(sortExpression) : lstRows.OrderByDescending(sortExpression);
+            string fields = "IdUnidad,NumeroEconomico,IdBase,BaseName,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,AnioEquipo,Descripcion,Capacidad,IdUnidadCapacidadMedida,UnidadCapacidadMedidaName,Odometro,Horometro,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
 
-            lstItems = lstRows
-                .Where(x => !x.Deleted)
-                .Where(ExpFullWhere)
-                .Select(Globals.BuildSelector<Unidad, Unidad>(strColumns))
-                .ProjectTo<UnidadViewModel>(_mapper.ConfigurationProvider);
+            lstItems = rows
+                         .Where(x => !x.Deleted)
+                         .Where(ExpFullWhere)
+                         .Select(Globals.BuildSelector<Unidad, Unidad>(fields))
+                         .ProjectTo<UnidadViewModel>(_mapper.ConfigurationProvider);
 
             return lstItems;
-        }
+        } 
 
-        public Task Delete(dynamic data, ClaimsPrincipal user)
+        public async Task Delete(dynamic data, ClaimsPrincipal user)
         {
-            throw new NotImplementedException();
+            var objTransaction = _context.Database.BeginTransaction();
+
+            string idUnidad = Globals.ParseGuid(data.idUnidad);
+
+            // ENCONTRAR UNIDAD A ELIMINAR
+            Unidad objModel = await Find(idUnidad);
+
+            if (objModel == null) { throw new ArgumentException("No se encontró la unidad."); }
+            if (objModel.Deleted) { throw new ArgumentException("La unidad ya fue eliminada anteriormente."); }
+
+            // ELIMINAR UNIDAD
+            objModel.Deleted = true;
+            objModel.SetUpdated(Globals.GetUser(user));
+
+            _context.Unidades.Update(objModel);
+            await _context.SaveChangesAsync();
+            objTransaction.Commit();
         }
 
         public async Task<Unidad> Find(string id)
@@ -212,45 +195,52 @@ namespace API.Inspecciones.Services
 
         public async Task<Unidad> FindSelectorById(string id, string fields)
         {
-            return await _context.Unidades.AsNoTracking().Where(x => x.IdUnidad == id)
-                        .Select(Globals.BuildSelector<Unidad, Unidad>(fields)).FirstOrDefaultAsync();
+            return await _context.Unidades.Where(x => x.IdUnidad == id).Select(Globals.BuildSelector<Unidad, Unidad>(fields)).FirstOrDefaultAsync();
         }
 
         public async Task<List<dynamic>> List()
         {
             return await _context.Unidades
-                .AsNoTracking()
-                .Where(x => !x.Deleted)
-                .OrderBy(x => x.NumeroEconomico)
-                .Select(x => new
-                {
-                    IdUnidad            = x.IdUnidad,
-                    NumeroEconomico     = x.NumeroEconomico,
-                    NumeroSerie         = x.NumeroSerie,
-                    Modelo              = x.Modelo,
-                    AnioEquipo          = x.AnioEquipo,
-                    IdUnidadMarca       = x.IdUnidadMarca,
-                    UnidadMarcaName     = x.UnidadMarcaName,
-                    IdUnidadTipo        = x.IdUnidadTipo,
-                    UnidadTipoName      = x.UnidadTipoName,
-                    Capacidad           = x.Capacidad,
-                })
-                .ToListAsync<dynamic>();
+                            .AsNoTracking()
+                            .Where(x => !x.Deleted)
+                            .OrderBy(x => x.NumeroEconomico)
+                            .Select(x => new
+                            {
+                                IdBase                      = x.IdBase,
+                                BaseName                    = x.BaseName,
+                                IdUnidad                    = x.IdUnidad,
+                                NumeroEconomico             = x.NumeroEconomico,
+                                IdUnidadTipo                = x.IdUnidadTipo,
+                                UnidadTipoName              = x.UnidadTipoName,
+                                IdUnidadMarca               = x.IdUnidadMarca,
+                                UnidadMarcaName             = x.UnidadMarcaName,
+                                IdUnidadPlacaTipo           = x.IdUnidadPlacaTipo,
+                                UnidadPlacaTipoName         = x.UnidadPlacaTipoName,
+                                Placa                       = x.Placa,
+                                NumeroSerie                 = x.NumeroSerie,
+                                Modelo                      = x.Modelo,
+                                AnioEquipo                  = x.AnioEquipo,
+                                Capacidad                   = x.Capacidad,
+                                IdUnidadCapacidadMedida     = x.IdUnidadCapacidadMedida,
+                                UnidadCapacidadMedidaName   = x.UnidadCapacidadMedidaName,
+                                value                       = string.Format("No. Económico: {0}", x.NumeroEconomico),
+                            })
+                            .ToListAsync<dynamic>();
         }
 
         public async Task<List<dynamic>> ListUsuarios()
         {
             var lstUsuarios = await _context.Unidades
-                .AsNoTracking()
-                .Select(x => new
-                {
-                    IdCreatedUser       = x.IdCreatedUser,
-                    CreatedUserName     = x.CreatedUserName,
-                    IdUpdatedUser       = x.IdUpdatedUser,
-                    UpdatedUserName     = x.UpdatedUserName,
-                })
-                .Distinct()
-                .ToListAsync();
+                                        .AsNoTracking()
+                                        .Select(x => new
+                                        {
+                                            IdCreatedUser   = x.IdCreatedUser,
+                                            CreatedUserName = x.CreatedUserName,
+                                            IdUpdatedUser   = x.IdUpdatedUser,
+                                            UpdatedUserName = x.UpdatedUserName,
+                                        })
+                                        .Distinct()
+                                        .ToListAsync<dynamic>();
 
             var rows = lstUsuarios.SelectMany(x => new[]
             {
@@ -277,63 +267,53 @@ namespace API.Inspecciones.Services
             return await ExcelManager<RepUnidad>.GetFile(columnsDataTable, lstRows);
         }
 
-        public async Task<List<dynamic>> Predictive(dynamic data)
+        public async Task Update(dynamic data, ClaimsPrincipal user)
         {
-            // INCLUDES
-            string fields = "IdUnidad,NumeroEconomico,IdBase,BaseName,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,AnioEquipo,Descripcion";
+            var objTransaction = _context.Database.BeginTransaction();
 
-            // QUERY
-            var lstItems = _context.Unidades
-                            .AsNoTracking()
-                            .Where(x => !x.Deleted)
-                            .OrderBy(w => w.NumeroEconomico)
-                            .Select(Globals.BuildSelector<Unidad, Unidad>(fields));
+            string idUnidad         = Globals.ParseGuid(data.idUnidad);
+            string numeroEconomico  = Globals.ToUpper(data.numeroEconomico);
 
-            // INITIALIZATION
-            DataSourceBuilder<Unidad> objDataSourceBuilder = new DataSourceBuilder<Unidad>();
-            objDataSourceBuilder.Source     = lstItems;
-            objDataSourceBuilder.Arguments  = data;
+            // ENCONTRAR UNIDAD A ACTUALIZAR
+            Unidad objModel = await Find(idUnidad);
 
-            // SEARCH FILTERS
-            Func<Expression<Func<Unidad, bool>>, string, string, Expression<Func<Unidad, bool>>> argSwitchFilters = (argExpression, argField, search) => { return argExpression; };
+            if (objModel == null) { throw new ArgumentException("No se encontró la unidad."); }
+            if (objModel.Deleted) { throw new ArgumentException("La unidad ha sido eliminada."); }
 
-            lstItems = objDataSourceBuilder.SearchFilters(argSwitchFilters);
+            bool editNumeroEconomico = !string.Equals(objModel.NumeroEconomico, numeroEconomico, StringComparison.OrdinalIgnoreCase);
 
-            // TAKE
-            lstItems = objDataSourceBuilder.Take();
-
-            // DATA MAPPING
-            var lstOriginal     = await lstItems.ToListAsync();
-            var lstRows         = new List<dynamic>();
-
-            lstOriginal.ForEach((item) =>
+            if (editNumeroEconomico)
             {
-                lstRows.Add(new
-                {
-                    IdUnidad            = item.IdUnidad,
-                    NumeroEconomico     = item.NumeroEconomico,
-                    IdBase              = item.IdBase,
-                    BaseName            = item.BaseName,
-                    IdUnidadTipo        = item.IdUnidadTipo,
-                    UnidadTipoName      = item.UnidadTipoName,
-                    IdUnidadMarca       = item.IdUnidadMarca,
-                    UnidadMarcaName     = item.UnidadMarcaName,
-                    IdUnidadPlacaTipo   = item.IdUnidadPlacaTipo,
-                    UnidadPlacaTipoName = item.UnidadPlacaTipoName,
-                    Placa               = item.Placa,
-                    NumeroSerie         = item.NumeroSerie,
-                    Modelo              = item.Modelo,
-                    AnioEquipo          = item.AnioEquipo,
-                    Descripcion         = item.Descripcion
-                });
-            });
+                bool findUnidad = await _context.Unidades.AnyAsync(x => x.NumeroEconomico.ToUpper() == numeroEconomico && x.IdUnidad != idUnidad && !x.Deleted);
 
-            return lstRows;
-        }
+                if (findUnidad) { throw new ArgumentException("Ya existe una unidad con ese número ecónomico."); }
+            }                            
 
-        public Task Update(dynamic data, ClaimsPrincipal user)
-        {
-            throw new NotImplementedException();
+            // ACTUALIZAR UNIDAD
+            objModel.NumeroEconomico            = numeroEconomico;
+            objModel.IdBase                     = Globals.ParseGuid(data.idBase);
+            objModel.BaseName                   = Globals.ToUpper(data.baseName);
+            objModel.IdUnidadTipo               = Globals.ParseGuid(data.idUnidadTipo);
+            objModel.UnidadTipoName             = Globals.ToUpper(data.unidadTipoName);
+            objModel.IdUnidadMarca              = Globals.ParseGuid(data.idUnidadMarca);
+            objModel.UnidadMarcaName            = Globals.ToUpper(data.unidadMarcaName);
+            objModel.IdUnidadPlacaTipo          = Globals.ParseGuid(data.idUnidadPlacaTipo);
+            objModel.UnidadPlacaTipoName        = Globals.ToUpper(data.unidadPlacaTipoName);
+            objModel.Placa                      = Globals.ToUpper(data.placa);
+            objModel.NumeroSerie                = Globals.ToUpper(data.numeroSerie);
+            objModel.Modelo                     = Globals.ToUpper(data.modelo);
+            objModel.AnioEquipo                 = Globals.ToUpper(data.anioEquipo);
+            objModel.Descripcion                = Globals.ToUpper(data.descripcion);
+            objModel.Capacidad                  = Globals.ParseDecimal(data.capacidad);
+            objModel.IdUnidadCapacidadMedida    = Globals.ParseGuid(data.idUnidadCapacidadMedida);
+            objModel.UnidadCapacidadMedidaName  = Globals.ToUpper(data.unidadCapacidadMedidaName);
+            objModel.Horometro                  = Globals.ParseInt(data.horometro)  ?? 0;
+            objModel.Odometro                   = Globals.ParseInt(data.odometro)   ?? 0;
+            objModel.SetUpdated(Globals.GetUser(user));
+
+            _context.Unidades.Update(objModel);
+            await _context.SaveChangesAsync();
+            objTransaction.Commit();
         }
     }
 }

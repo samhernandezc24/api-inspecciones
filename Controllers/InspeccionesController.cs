@@ -96,11 +96,13 @@ namespace API.Inspecciones.Controllers
 
             try
             {
-                List<dynamic> lstInspeccionesTipos = await _inspeccionesTiposService.List();
+                List<dynamic> lstInspeccionesTipos          = await _inspeccionesTiposService.List();
+                List<dynamic> lstUnidadesCapacidadesMedidas = await _unidadesCapacidadesMedidadesService.List();
 
                 objReturn.Result = new
                 {
-                    InspeccionesTipos = lstInspeccionesTipos,
+                    InspeccionesTipos           = lstInspeccionesTipos,
+                    UnidadesCapacidadesMedidas  = lstUnidadesCapacidadesMedidas,
                 };
 
                 objReturn.Success(SuccessMessage.REQUEST);
