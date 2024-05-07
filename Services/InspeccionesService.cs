@@ -171,55 +171,61 @@ namespace API.Inspecciones.Services
             {
                 lstRows.Add(new
                 {
-                    IdInspeccion = item.IdInspeccion,
-                    IdRequerimiento = item.IdRequerimiento,
-                    RequerimientoFolio = item.RequerimientoFolio,
-                    //FechaProgramada = item.FechaProgramada,
-                    IdInspeccionEstatus = item.IdInspeccionEstatus,
-                    InspeccionEstatusName = item.InspeccionEstatusName,
-                    IdInspeccionTipo = item.IdInspeccionTipo,
-                    InspeccionTipoCodigo = item.InspeccionTipoCodigo,
-                    InspeccionTipoName = item.InspeccionTipoName,
-                    IdBase = item.IdBase,
-                    BaseName = item.BaseName,
-                    IdUnidad = item.IdUnidad,
-                    UnidadNumeroEconomico = item.UnidadNumeroEconomico,
-                    IsUnidadTemporal = item.IsUnidadTemporal,
-                    IdUnidadTipo = item.IdUnidadTipo,
-                    UnidadTipoName = item.UnidadTipoName,
-                    IdUnidadMarca = item.IdUnidadMarca,
-                    UnidadMarcaName = item.UnidadMarcaName,
-                    IdUnidadPlacaTipo = item.IdUnidadPlacaTipo,
-                    UnidadPlacaTipoName = item.UnidadPlacaTipoName,
-                    Placa = item.Placa,
-                    NumeroSerie = item.NumeroSerie,
-                    Modelo = item.Modelo,
-                    AnioEquipo = item.AnioEquipo,
-                    Capacidad = item.Capacidad,
-                    //IdUnidadCapacidadMedida = item.IdUnidadCapacidadMedida,
-                    //UnidadCapacidadMedidaName = item.UnidadCapacidadMedidaName,
-                    //Evaluado = item.Evaluado,
-                    Locacion = item.Locacion,
-                    TipoPlataforma = item.TipoPlataforma,
-                    Odometro = item.Odometro,
-                    Horometro = item.Horometro,
-                    CreatedUserName = item.CreatedUserName,
-                    CreatedFechaNatural = item.CreatedFechaNatural,
-                    UpdatedUserName = item.UpdatedUserName,
-                    UpdatedFechaNatural = item.UpdatedFechaNatural,
+                    IdInspeccion                    = item.IdInspeccion,
+                    RequerimientoFolio              = item.RequerimientoFolio,
+                    HasRequerimiento                = item.HasRequerimiento,
+                    Folio                           = item.Folio,
+                    FechaProgramada                 = item.FechaProgramada,
+                    FechaProgramadaNatural          = item.FechaProgramadaNatural,
+                    FechaInspeccionInicialNatural   = item.FechaInspeccionInicialNatural,
+                    UserInspeccionInicialName       = item.UserInspeccionInicialName,
+                    FechaInspeccionFinalNatural     = item.FechaInspeccionFinalNatural,
+                    UserInspeccionFinalName         = item.UserInspeccionFinalName,
+                    IsValid                         = item.IsValid,
+                    IdInspeccionEstatus             = item.IdInspeccionEstatus,
+                    InspeccionEstatusName           = item.InspeccionEstatusName,
+                    IsCancelado                     = item.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb34",
+                    InspeccionTipoCodigo            = item.InspeccionTipoCodigo,
+                    InspeccionTipoName              = item.InspeccionTipoName,
+                    BaseName                        = item.BaseName,
+                    IdUnidad                        = item.IdUnidad,
+                    UnidadNumeroEconomico           = item.UnidadNumeroEconomico,
+                    IsUnidadTemporal                = item.IsUnidadTemporal,
+                    UnidadTipoName                  = item.UnidadTipoName,
+                    UnidadMarcaName                 = item.UnidadMarcaName,
+                    UnidadPlacaTipoName             = item.UnidadPlacaTipoName,
+                    Placa                           = item.Placa,
+                    NumeroSerie                     = item.NumeroSerie,
+                    Modelo                          = item.Modelo,
+                    AnioEquipo                      = item.AnioEquipo,
+                    Capacidad                       = item.Capacidad,
+                    UnidadCapacidadMedidaName       = item.UnidadCapacidadMedidaName,
+                    Evaluado                        = item.Evaluado,
+                    FechaEvaluacionNatural          = item.FechaEvaluacionNatural,
+                    Locacion                        = item.Locacion,
+                    TipoPlataforma                  = item.TipoPlataforma,
+                    Odometro                        = item.Odometro,
+                    Horometro                       = item.Horometro,
+                    Observaciones                   = item.Observaciones,
+                    FirmaOperador                   = item.FirmaOperador,
+                    FirmaVerificador                = item.FirmaVerificador,
+                    CreatedUserName                 = item.CreatedUserName,
+                    CreatedFechaNatural             = item.CreatedFechaNatural,
+                    UpdatedUserName                 = item.UpdatedUserName,
+                    UpdatedFechaNatural             = item.UpdatedFechaNatural
                 });
             });
 
-            var objResutl = new
+            var objResult = new
             {
-                rows = lstRows,
-                count = objDataBuilder.count,
-                length = objDataBuilder.length,
-                pages = objDataBuilder.pages,
-                page = objDataBuilder.page,
+                rows    = lstRows,
+                count   = objDataBuilder.count,
+                length  = objDataBuilder.length,
+                pages   = objDataBuilder.pages,
+                page    = objDataBuilder.page,
             };
 
-            return objResutl;
+            return objResult;
         }
 
         public IQueryable<InspeccionViewModel> DataSourceExpression(dynamic data)
@@ -400,7 +406,7 @@ namespace API.Inspecciones.Services
                                             UpdatedUserName = x.UpdatedUserName,
                                         })
                                         .Distinct()
-                                        .ToListAsync<dynamic>();
+                                        .ToListAsync();
 
             var rows = lstUsuarios.SelectMany(x => new[]
             {
