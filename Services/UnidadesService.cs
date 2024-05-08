@@ -220,9 +220,11 @@ namespace API.Inspecciones.Services
                                 NumeroSerie                 = x.NumeroSerie,
                                 Modelo                      = x.Modelo,
                                 AnioEquipo                  = x.AnioEquipo,
-                                Capacidad                   = x.Capacidad,
+                                Capacidad                   = x.Capacidad.ToString(),
                                 IdUnidadCapacidadMedida     = x.IdUnidadCapacidadMedida,
                                 UnidadCapacidadMedidaName   = x.UnidadCapacidadMedidaName,
+                                Odometro                    = x.Odometro.ToString(),
+                                Horometro                   = x.Horometro.ToString(),
                                 value                       = string.Format("No. Económico: {0}", x.NumeroEconomico),
                             })
                             .ToListAsync<dynamic>();

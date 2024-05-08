@@ -14,14 +14,17 @@ namespace API.Inspecciones.Controllers
         private readonly InspeccionesService _inspeccionesService;
         private readonly InspeccionesEstatusService _inspeccionesEstatusService;
         private readonly InspeccionesTiposService _inspeccionesTiposService;
+        private readonly UnidadesService _unidadesService;
         private readonly UnidadesCapacidadesMedidadesService _unidadesCapacidadesMedidadesService;
 
         public InspeccionesController(InspeccionesService inspeccionesService, InspeccionesEstatusService inspeccionesEstatusService, 
-                                    InspeccionesTiposService inspeccionesTiposService, UnidadesCapacidadesMedidadesService unidadesCapacidadesMedidadesService)
+                                      InspeccionesTiposService inspeccionesTiposService, UnidadesService unidadesService, 
+                                      UnidadesCapacidadesMedidadesService unidadesCapacidadesMedidadesService)
         {
             _inspeccionesService                    = inspeccionesService;
             _inspeccionesEstatusService             = inspeccionesEstatusService;
             _inspeccionesTiposService               = inspeccionesTiposService;
+            _unidadesService                        = unidadesService;
             _unidadesCapacidadesMedidadesService    = unidadesCapacidadesMedidadesService;
         }
 
@@ -97,11 +100,13 @@ namespace API.Inspecciones.Controllers
             try
             {
                 List<dynamic> lstInspeccionesTipos          = await _inspeccionesTiposService.List();
+                List<dynamic> lstUnidades                   = await _unidadesService.List();
                 List<dynamic> lstUnidadesCapacidadesMedidas = await _unidadesCapacidadesMedidadesService.List();
 
                 objReturn.Result = new
                 {
                     InspeccionesTipos           = lstInspeccionesTipos,
+                    Unidades                    = lstUnidades,
                     UnidadesCapacidadesMedidas  = lstUnidadesCapacidadesMedidas,
                 };
 
