@@ -5,7 +5,6 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Numerics;
 using System.Security.Claims;
 using Workcube.Interfaces;
 using Workcube.Libraries;
@@ -159,18 +158,23 @@ namespace API.Inspecciones.Services
 
         public async Task<dynamic> DataSource(dynamic data, ClaimsPrincipal user)
         {
-            IQueryable<InspeccionViewModel> lstData = DataSourceExpression(data);
-            DataSourceBuilder<InspeccionViewModel> objDataTableBuilder = new DataSourceBuilder<InspeccionViewModel>(data, lstData);
-            var objDataBuilder = await objDataTableBuilder.build();
+            IQueryable<InspeccionViewModel> lstItems = DataSourceExpression(data);
+            DataSourceBuilder<InspeccionViewModel> objDataTableBuilder = new DataSourceBuilder<InspeccionViewModel>(data, lstItems);
+            var objDataTableResult = await objDataTableBuilder.build();
 
             // CONSTRUCCION RETORNO DE DATOS
-            List<InspeccionViewModel> lstOriginal = objDataBuilder.rows;
+            List<InspeccionViewModel> lstOriginal = objDataTableResult.rows;
             List<dynamic> lstRows = new List<dynamic>();
+
+            int length  = (int)data.length;
+            int page    = (int)data.page;
+            int index   = ((page - 1) * length) + 1;
 
             lstOriginal.ForEach(item =>
             {
                 lstRows.Add(new
                 {
+                    index                           = index,
                     IdInspeccion                    = item.IdInspeccion,
                     RequerimientoFolio              = item.RequerimientoFolio,
                     HasRequerimiento                = item.HasRequerimiento,
@@ -214,18 +218,19 @@ namespace API.Inspecciones.Services
                     UpdatedUserName                 = item.UpdatedUserName,
                     UpdatedFechaNatural             = item.UpdatedFechaNatural
                 });
+                index++;
             });
 
-            var objResult = new
+            var objReturn = new
             {
                 rows    = lstRows,
-                count   = objDataBuilder.count,
-                length  = objDataBuilder.length,
-                pages   = objDataBuilder.pages,
-                page    = objDataBuilder.page,
+                count   = objDataTableResult.count,
+                length  = objDataTableResult.length,
+                pages   = objDataTableResult.pages,
+                page    = objDataTableResult.page,
             };
 
-            return objResult;
+            return objReturn;
         }
 
         public IQueryable<InspeccionViewModel> DataSourceExpression(dynamic data)
@@ -238,17 +243,15 @@ namespace API.Inspecciones.Services
             var filters = new Dictionary<string, Func<string, Expression<Func<Inspeccion, bool>>>>
             {
                 {"HasRequerimiento",    (strValue) => item => !string.IsNullOrEmpty(item.RequerimientoFolio) == Globals.ParseBool(strValue)},
-                {"IdCreatedUser",       (strValue) => item => item.IdCreatedUser == strValue},
-                {"IdUpdatedUser",       (strValue) => item => item.IdUpdatedUser == strValue},
+                {"IdUnidadTipo",        (strValue) => item => item.IdUnidadTipo         == strValue},
+                {"IdInspeccionEstatus", (strValue) => item => item.IdInspeccionEstatus  == strValue},
+                {"IdInspeccionTipo",    (strValue) => item => item.IdInspeccionTipo     == strValue},
+                {"IdCreatedUser",       (strValue) => item => item.IdCreatedUser        == strValue},
+                {"IdUpdatedUser",       (strValue) => item => item.IdUpdatedUser        == strValue},
             };
 
             // FILTROS MULTIPLE
-            var filtersMultiple = new Dictionary<string, Func<string, Expression<Func<Inspeccion, bool>>>>
-            {
-                {"IdUnidadTipo",            (strValue) => item => item.IdUnidadTipo == strValue},
-                {"IdInspeccionEstatus",     (strValue) => item => item.IdInspeccionEstatus == strValue},
-                {"IdInspeccionTipo",        (strValue) => item => item.IdInspeccionTipo == strValue},
-            };
+            var filtersMultiple = new Dictionary<string, Func<string, Expression<Func<Inspeccion, bool>>>> { };
 
             // FILTROS FECHAS
             DateTime? dateFrom  = SourceExpression<Inspeccion>.Date((string)data.dateFrom);
@@ -274,25 +277,20 @@ namespace API.Inspecciones.Services
 
             switch (orderColumn)
             {
-                case "folio"                                : sortExpression = (x => x.Folio);                                  break;
-                case "requerimientoFolio"                   : sortExpression = (x => x.RequerimientoFolio);                     break;
-                case "fechaProgramdaNatural"                : sortExpression = (x => x.FechaProgramada);                        break;
-                case "inspeccionEstatusName"                : sortExpression = (x => x.InspeccionEstatusName);                  break;
-                case "createdUserName"                      : sortExpression = (x => x.CreatedUserName);                        break;
-                case "createdFechaNatural"                  : sortExpression = (x => x.CreatedFecha);                           break;
-                case "updatedUserName"                      : sortExpression = (x => x.UpdatedUserName);                        break;
-                case "updatedFechaNatural"                  : sortExpression = (x => x.UpdatedFecha);                           break;
-                default                                     : sortExpression = (x => x.CreatedFecha);                           break;
+                case "folio"                    : sortExpression = (x => x.Folio);                  break;
+                case "fechaProgramada"          : sortExpression = (x => x.FechaProgramada);        break;
+                case "createdFechaNatural"      : sortExpression = (x => x.CreatedFecha);           break;
+                default                         : sortExpression = (x => x.CreatedFecha);           break;
             }
 
             // COMPLETE
-            IQueryable<Inspeccion> lstRows = _context.Inspecciones.AsNoTracking();
+            IQueryable<Inspeccion> rows = _context.Inspecciones.AsNoTracking();
 
-            lstRows = (orderDirection == "asc") ? lstRows.OrderBy(sortExpression) : lstRows.OrderByDescending(sortExpression);
+            rows = (orderDirection == "asc") ? rows.OrderBy(sortExpression) : rows.OrderByDescending(sortExpression);
 
             string fields = "IdInspeccion,RequerimientoFolio,Folio,FechaProgramada,FechaInspeccionInicial,UserInspeccionInicialName,FechaInspeccionFinal,UserInspeccionFinalName,IdInspeccionEstatus,InspeccionEstatusName,InspeccionTipoCodigo,InspeccionTipoName,BaseName,IdUnidad,UnidadNumeroEconomico,IsUnidadTemporal,UnidadTipoName,UnidadMarcaName,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,AnioEquipo,Capacidad,UnidadCapacidadMedidaName,Evaluado,FechaEvaluacion,Locacion,TipoPlataforma,Odometro,Horometro,Observaciones,FirmaOperador,FirmaVerificador,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
 
-            lstItems = lstRows
+            lstItems = rows
                         .Where(x => !x.Deleted)
                         .Where(ExpFullWhere)
                         .Select(Globals.BuildSelector<Inspeccion, Inspeccion>(fields))

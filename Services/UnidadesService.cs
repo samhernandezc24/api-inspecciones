@@ -206,10 +206,10 @@ namespace API.Inspecciones.Services
                             .OrderBy(x => x.NumeroEconomico)
                             .Select(x => new
                             {
-                                IdBase                      = x.IdBase,
-                                BaseName                    = x.BaseName,
                                 IdUnidad                    = x.IdUnidad,
                                 NumeroEconomico             = x.NumeroEconomico,
+                                IdBase                      = x.IdBase,
+                                BaseName                    = x.BaseName,
                                 IdUnidadTipo                = x.IdUnidadTipo,
                                 UnidadTipoName              = x.UnidadTipoName,
                                 IdUnidadMarca               = x.IdUnidadMarca,
