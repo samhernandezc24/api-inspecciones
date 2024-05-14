@@ -23,6 +23,10 @@ namespace API.Inspecciones.Services
             string idInspeccionTipo = Globals.ParseGuid(data.idInspeccionTipo);
             string name = Globals.ToUpper(data.name);
 
+            // Verificar si coincide el id de inspeccion tipo.
+            var findInspeccionTipo = await _context.InspeccionesTipos.AnyAsync(x => x.IdInspeccionTipo == idInspeccionTipo && !x.Deleted);
+            if (!findInspeccionTipo) { throw new ArgumentException("El tipo de inspección especificado no existe."); }
+
             // Obtener todas las categorias existentes para el tipo de inspeccion dado.
             var lstCategorias = await _context.Categorias
                                         .Where(x => x.IdInspeccionTipo == idInspeccionTipo && !x.Deleted)
