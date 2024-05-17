@@ -22,6 +22,10 @@ namespace API.Inspecciones.Services
 
             string idCategoria = Globals.ParseGuid(data.idCategoria);
 
+            // Verificar si coincide el id de la categoria.
+            var findCategoria = await _context.Categorias.AnyAsync(x => x.IdCategoria == idCategoria && !x.Deleted);
+            if (!findCategoria) { throw new ArgumentException("La categoria especificada no existe."); }
+
             // Obtener todas las preguntas existentes para la categoria dada.
             var lstCategoriasItems = await _context.CategoriasItems
                                         .Where(x => x.IdCategoria == idCategoria && !x.Deleted)
