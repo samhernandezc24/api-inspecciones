@@ -245,7 +245,6 @@ namespace API.Inspecciones.Services
                 {"HasRequerimiento",    (strValue) => item => !string.IsNullOrEmpty(item.RequerimientoFolio) == Globals.ParseBool(strValue)},
                 {"IdUnidadTipo",        (strValue) => item => item.IdUnidadTipo         == strValue},
                 {"IdInspeccionEstatus", (strValue) => item => item.IdInspeccionEstatus  == strValue},
-                {"IdInspeccionTipo",    (strValue) => item => item.IdInspeccionTipo     == strValue},
                 {"IdCreatedUser",       (strValue) => item => item.IdCreatedUser        == strValue},
                 {"IdUpdatedUser",       (strValue) => item => item.IdUpdatedUser        == strValue},
             };
@@ -259,9 +258,7 @@ namespace API.Inspecciones.Services
 
             var dates = new Dictionary<string, DateExpression<Inspeccion>>()
             {
-                { "FechaProgramada",            new DateExpression<Inspeccion>{ dateFrom = item => item.FechaProgramada.Date                >= dateFrom, dateTo = item => item.FechaProgramada.Date                 <= dateTo } },
-                { "FechaInspeccionInicial",     new DateExpression<Inspeccion>{ dateFrom = item => item.FechaInspeccionInicial.Value.Date   >= dateFrom, dateTo = item => item.FechaInspeccionInicial.Value.Date    <= dateTo } },
-                { "FechaInspeccionFinal",       new DateExpression<Inspeccion>{ dateFrom = item => item.FechaInspeccionFinal.Value.Date     >= dateFrom, dateTo = item => item.FechaInspeccionFinal.Value.Date      <= dateTo } },
+                { "FechaProgramada",            new DateExpression<Inspeccion>{ dateFrom = item => item.FechaProgramada.Date                >= dateFrom, dateTo = item => item.FechaProgramada.Date                 <= dateTo } },                
                 { "FechaEvaluacion",            new DateExpression<Inspeccion>{ dateFrom = item => item.FechaEvaluacion.Value.Date          >= dateFrom, dateTo = item => item.FechaEvaluacion.Value.Date           <= dateTo } },                
                 { "CreatedFecha",               new DateExpression<Inspeccion>{ dateFrom = item => item.CreatedFecha.Date                   >= dateFrom, dateTo = item => item.CreatedFecha.Date                    <= dateTo } },
                 { "UpdatedFecha",               new DateExpression<Inspeccion>{ dateFrom = item => item.UpdatedFecha.Date                   >= dateFrom, dateTo = item => item.UpdatedFecha.Date                    <= dateTo } }
@@ -278,6 +275,7 @@ namespace API.Inspecciones.Services
             switch (orderColumn)
             {
                 case "folio"                    : sortExpression = (x => x.Folio);                  break;
+                case "inspeccionEstatusName"    : sortExpression = (x => x.InspeccionEstatusName);  break;
                 case "fechaProgramada"          : sortExpression = (x => x.FechaProgramada);        break;
                 case "createdFechaNatural"      : sortExpression = (x => x.CreatedFecha);           break;
                 default                         : sortExpression = (x => x.CreatedFecha);           break;
