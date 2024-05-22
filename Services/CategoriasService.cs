@@ -127,6 +127,30 @@ namespace API.Inspecciones.Services
                             .ToListAsync<dynamic>();
         }
 
+        public async Task<List<dynamic>> ListEvaluacion(string idInspeccionTipo)
+        {
+            return await _context.Categorias
+                            .AsNoTracking()
+                            .Where(x => x.IdInspeccionTipo == idInspeccionTipo && !x.Deleted)
+                            .OrderBy(x => x.Orden)
+                            .Select(x => new
+                            {
+                                IdCategoria             = x.IdCategoria,
+                                Name                    = x.Name,
+                                CategoriasItems         = x.CategoriasItems.Where(d => !d.Deleted)
+                                                            .OrderBy(x => x.Orden)
+                                                            .Select(d => new
+                                                            {
+                                                                IdCategoriaItem     = d.IdCategoriaItem,
+                                                                Name                = d.Name,
+                                                                IdFormularioTipo    = d.IdFormularioTipo,
+                                                                FormularioTipoName  = d.FormularioTipoName,
+                                                                FormularioValor     = d.FormularioValor,
+                                                            }).ToList()
+                            })
+                            .ToListAsync<dynamic>();
+        }
+
         public Task<byte[]> Reporte(dynamic data)
         {
             throw new NotImplementedException();

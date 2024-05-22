@@ -24,7 +24,6 @@ namespace API.Inspecciones.Services
 
             string idInspeccion     = Globals.ParseGuid(data.idInspeccion);
             bool isParcial          = Globals.ParseBool(data.isParcial);
-            bool isSatisfactorio    = Globals.ParseBool(data.isSatisfactorio);
 
             Inspeccion objInspeccion = await _inspeccionesService.Find(idInspeccion);
 
@@ -41,20 +40,20 @@ namespace API.Inspecciones.Services
             if (!isParcial) { objInspeccion.Evaluado = true; }
 
             objInspeccion.FechaEvaluacion   = DateTime.Now;
-            //objInspeccion.isSatisfactorio   = isSatisfactorio;
             objInspeccion.SetUpdated(objUser);
 
-            List<InspeccionCategoria> rangeCategoria = new List<InspeccionCategoria>();
-            List<InspeccionCategoriaValue> rangeCategoriaValue = new List<InspeccionCategoriaValue>();
+            List<InspeccionCategoria> rangeCategoria            = new List<InspeccionCategoria>();
+            List<InspeccionCategoriaValue> rangeCategoriaValue  = new List<InspeccionCategoriaValue>();
 
             foreach (var categoria in data.categorias)
             {
                 InspeccionCategoria objCategoria = new InspeccionCategoria();
 
                 objCategoria.IdInspeccionCategoria  = Guid.NewGuid().ToString();
-                objCategoria.IdInspeccion           = idInspeccion;
                 objCategoria.IdCategoria            = Globals.ParseGuid(categoria.idCategoria);
                 objCategoria.CategoriaName          = Globals.ToUpper(categoria.name);
+                objCategoria.IdInspeccion           = idInspeccion;
+                objCategoria.SetCreated(objUser);
                 rangeCategoria.Add(objCategoria);
 
                 foreach (var item in categoria.categoriasItems)
@@ -67,8 +66,9 @@ namespace API.Inspecciones.Services
                     objValue.CategoriaItemName              = Globals.ToUpper(item.name);
                     objValue.IdFormularioTipo               = Globals.ParseGuid(item.idFormularioTipo);
                     objValue.FormularioTipoName             = Globals.ToUpper(item.formularioTipoName);
-                    objValue.FormularioValor                = "";
-                    objValue.Value                          = Globals.ToUpper(item.value);
+                    objValue.FormularioValor                = Globals.ToString(item.formularioValor);
+                    objValue.Value                          = Globals.ToString(item.value);
+                    objValue.SetCreated(objUser);
                     rangeCategoriaValue.Add(objValue);
                 }
             }
@@ -100,6 +100,8 @@ namespace API.Inspecciones.Services
                                                         Name                = d.CategoriaItemName,
                                                         IdFormularioTipo    = d.IdFormularioTipo,
                                                         FormularioTipoName  = d.FormularioTipoName,
+                                                        FormularioValor     = d.FormularioValor,
+                                                        Value               = d.Value,
                                                     }).ToList()
                             })
                             .ToListAsync<dynamic>();

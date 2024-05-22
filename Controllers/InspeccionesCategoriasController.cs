@@ -32,21 +32,30 @@ namespace API.Inspecciones.Controllers
             {
                 var idInspeccion = Globals.ParseGuid(Globals.JsonData(data).idInspeccion);
 
-                Inspeccion objModel = await _inspeccionesService.FindSelectorById(idInspeccion, "");
+                Inspeccion objModel = await _inspeccionesService.FindSelectorById(idInspeccion, "Folio,UnidadNumeroEconomico,IdUnidadTipo,UnidadTipoName,UnidadMarcaName,NumeroSerie,IdInspeccionTipo,InspeccionTipoCodigo,InspeccionTipoName,FechaInspeccionInicial,FechaEvaluacion");
 
                 var objInspeccion = new
                 {
-
+                    objModel.Folio,
+                    objModel.UnidadNumeroEconomico,
+                    objModel.UnidadTipoName,
+                    objModel.UnidadMarcaName,
+                    objModel.NumeroSerie,
+                    objModel.InspeccionTipoCodigo,
+                    objModel.InspeccionTipoName,
+                    objModel.FechaInspeccionInicial,
                 };
 
                 List<dynamic> lstCategorias = new List<dynamic>();
                 if (objModel.FechaEvaluacion.HasValue)
                 {
                     lstCategorias = await _inspeccionesCategoriasService.ListEvaluacion(idInspeccion);
+                    Console.WriteLine("MOSTRAR LISTADO DE EVALUACIONES DE LA INSPECCION");
                 } 
                 else
                 {
-                    //lstCategorias = await _categoriasService.ListEvaluacion(objModel.IdInspeccionTipo);
+                    lstCategorias = await _categoriasService.ListEvaluacion(objModel.IdInspeccionTipo);
+                    Console.WriteLine("MOSTRAR LISTADO DE EVALUACIONES DE LA INSPECCION (POR EVALUAR)");
                 }
 
                 objReturn.Result = new
@@ -77,10 +86,10 @@ namespace API.Inspecciones.Controllers
 
             try
             {
-                await _inspeccionesCategoriasService.Create(Globals.JsonData(data), User);
+                bool isParcial = await _inspeccionesCategoriasService.Create(Globals.JsonData(data), User);
 
-                objReturn.Title     = "Nueva categoría";
-                objReturn.Message   = "Categoría creada exitosamente";
+                objReturn.Title     = isParcial ? "Guardado parcial" : "Finalizado";
+                objReturn.Message   = isParcial ? "La evaluación ha sido guardada de forma parcial" : "Evaluación finalizada exitosamente";
             }
             catch (AppException appException)
             {
