@@ -79,36 +79,7 @@ namespace API.Inspecciones.Controllers
             }
 
             return objReturn.build();
-        }
-
-        [HttpPost("List")]
-        [Authorize]
-        public async Task<ActionResult<dynamic>> List()
-        {
-            JsonReturn objReturn = new JsonReturn();
-
-            try
-            {
-                List<dynamic> lstUnidades = await _unidadesService.List();
-
-                objReturn.Result = new
-                {
-                    unidades = lstUnidades,
-                };
-
-                objReturn.Success(SuccessMessage.REQUEST);
-            }
-            catch (AppException ex)
-            {
-                objReturn.Exception(ex);
-            }
-            catch (Exception ex)
-            {
-                objReturn.Exception(ExceptionMessage.RawException(ex));
-            }
-
-            return objReturn.build();
-        }
+        }        
 
         [HttpPost("Create")]
         [Authorize]
@@ -158,6 +129,35 @@ namespace API.Inspecciones.Controllers
 
                 objReturn.Title     = "Nueva unidad";
                 objReturn.Message   = "La unidad se ha creado exitosamente";
+            }
+            catch (AppException ex)
+            {
+                objReturn.Exception(ex);
+            }
+            catch (Exception ex)
+            {
+                objReturn.Exception(ExceptionMessage.RawException(ex));
+            }
+
+            return objReturn.build();
+        }
+
+        [HttpPost("List")]
+        [Authorize]
+        public async Task<ActionResult<dynamic>> List()
+        {
+            JsonReturn objReturn = new JsonReturn();
+
+            try
+            {
+                List<dynamic> lstUnidades = await _unidadesService.List();
+
+                objReturn.Result = new
+                {
+                    unidades = lstUnidades,
+                };
+
+                objReturn.Success(SuccessMessage.REQUEST);
             }
             catch (AppException ex)
             {

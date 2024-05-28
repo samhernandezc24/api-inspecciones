@@ -39,7 +39,7 @@ namespace API.Inspecciones.Services
             CategoriaItem objModel = new CategoriaItem();
 
             objModel.IdCategoriaItem        = Guid.NewGuid().ToString();
-            objModel.Name                   = "Pregunta";
+            objModel.Name                   = Globals.ToString(data.name);
             objModel.IdCategoria            = idCategoria;
             objModel.CategoriaName          = Globals.ToUpper(data.categoriaName);
             objModel.IdFormularioTipo       = "ea52bdfd-8af6-4f5a-b182-2b99e554eb32";

@@ -50,12 +50,10 @@ namespace API.Inspecciones.Controllers
                 if (objModel.FechaEvaluacion.HasValue)
                 {
                     lstCategorias = await _inspeccionesCategoriasService.ListEvaluacion(idInspeccion);
-                    Console.WriteLine("MOSTRAR LISTADO DE EVALUACIONES DE LA INSPECCION");
                 } 
                 else
                 {
                     lstCategorias = await _categoriasService.ListEvaluacion(objModel.IdInspeccionTipo);
-                    Console.WriteLine("MOSTRAR LISTADO DE EVALUACIONES DE LA INSPECCION (POR EVALUAR)");
                 }
 
                 objReturn.Result = new
