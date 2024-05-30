@@ -84,10 +84,5 @@ namespace API.Inspecciones.Services
                             })
                             .ToListAsync<dynamic>();
         }
-
-        public Task Update(dynamic data, ClaimsPrincipal user)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
