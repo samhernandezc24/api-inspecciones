@@ -25,5 +25,10 @@ namespace API.Inspecciones.Models
         public string FormularioValor { get; set; }
 
         public string Value { get; set; }
+
+        public bool NoAplica {  get; set; }
+
+        public string Observaciones { get; set; }
+        public bool HasObservaciones => !string.IsNullOrEmpty(Observaciones);
     }
 }

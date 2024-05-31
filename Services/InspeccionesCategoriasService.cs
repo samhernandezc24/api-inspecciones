@@ -1,6 +1,7 @@
 ﻿using API.Inspecciones.Models;
 using API.Inspecciones.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using Workcube.Libraries;
 
@@ -68,6 +69,7 @@ namespace API.Inspecciones.Services
                     objValue.FormularioTipoName             = Globals.ToUpper(item.formularioTipoName);
                     objValue.FormularioValor                = Globals.ToString(item.formularioValor);
                     objValue.Value                          = Globals.ToString(item.value);
+                    objValue.Observaciones                  = Globals.ToString(item.observaciones);
                     objValue.SetCreated(objUser);
                     rangeCategoriaValue.Add(objValue);
                 }
@@ -102,6 +104,9 @@ namespace API.Inspecciones.Services
                                                         FormularioTipoName  = d.FormularioTipoName,
                                                         FormularioValor     = d.FormularioValor,
                                                         Value               = d.Value,
+                                                        NoAplica            = d.NoAplica,
+                                                        Observaciones       = d.Observaciones,
+                                                        HasObservaciones    = !string.IsNullOrEmpty(d.Observaciones),
                                                     }).ToList()
                             })
                             .ToListAsync<dynamic>();
