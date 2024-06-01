@@ -1,8 +1,8 @@
-﻿using System.Security.Claims;
+﻿using System.Drawing;
+using System.Security.Claims;
 using API.Inspecciones.Models;
 using API.Inspecciones.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Workcube.Interfaces;
 using Workcube.Libraries;
 
 namespace API.Inspecciones.Services
@@ -30,8 +30,9 @@ namespace API.Inspecciones.Services
             InspeccionFichero objModel = new InspeccionFichero();
 
             objModel.IdInspeccionFichero    = Guid.NewGuid().ToString();
-            objModel.IdInspeccion           = Globals.ParseGuid(data.idInspeccion);
             objModel.Path                   = filePath;
+            objModel.IdInspeccion           = Globals.ParseGuid(data.idInspeccion);
+            objModel.InspeccionFolio        = Globals.ToUpper(data.inspeccionFolio);
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.InspeccionesFicheros.Add(objModel);

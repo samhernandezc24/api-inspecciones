@@ -69,6 +69,7 @@ namespace API.Inspecciones.Services
                     objValue.FormularioTipoName             = Globals.ToUpper(item.formularioTipoName);
                     objValue.FormularioValor                = Globals.ToString(item.formularioValor);
                     objValue.Value                          = Globals.ToString(item.value);
+                    objValue.NoAplica                       = Globals.ParseBool(item.noAplica);
                     objValue.Observaciones                  = Globals.ToString(item.observaciones);
                     objValue.SetCreated(objUser);
                     rangeCategoriaValue.Add(objValue);
