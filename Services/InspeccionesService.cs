@@ -34,13 +34,13 @@ namespace API.Inspecciones.Services
 
             if (objModel == null) { throw new ArgumentException("No se encontró la inspección."); }
 
-            if (objModel.FechaInspeccionFinal != null || objModel.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb34")
+            if (objModel.FechaInspeccionFinal != null || objModel.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb35")
             {
                 throw new ArgumentException("La inspección ya fue cancelada anteriormente.");
             }
 
             // CANCELAR INSPECCION
-            objModel.IdInspeccionEstatus    = "ea52bdfd-8af6-4f5a-b182-2b99e554eb34";
+            objModel.IdInspeccionEstatus    = "ea52bdfd-8af6-4f5a-b182-2b99e554eb35";
             objModel.InspeccionEstatusName  = "CANCELADO";
             objModel.SetUpdated(Globals.GetUser(user));
 
@@ -188,7 +188,7 @@ namespace API.Inspecciones.Services
                     IsValid                         = item.IsValid,
                     IdInspeccionEstatus             = item.IdInspeccionEstatus,
                     InspeccionEstatusName           = item.InspeccionEstatusName,
-                    IsCancelado                     = item.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb34",
+                    IsCancelado                     = item.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb35",
                     InspeccionTipoCodigo            = item.InspeccionTipoCodigo,
                     InspeccionTipoName              = item.InspeccionTipoName,
                     BaseName                        = item.BaseName,
@@ -313,7 +313,7 @@ namespace API.Inspecciones.Services
 
             if (objModel == null) { throw new ArgumentException("No se encontró la inspección."); }
 
-            if (objModel.FechaInspeccionFinal != null || objModel.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb33" || objModel.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb35")
+            if (objModel.FechaInspeccionFinal != null || objModel.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb34" || objModel.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb35")
             {
                 throw new ArgumentException("La inspección ya fue finalizada o cancelada anteriormente.");
             }

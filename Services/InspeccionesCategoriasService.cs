@@ -47,6 +47,12 @@ namespace API.Inspecciones.Services
 
             if (!isParcial) { objInspeccion.Evaluado = true; }
 
+            if (objInspeccion.Evaluado)
+            {
+                objInspeccion.IdInspeccionEstatus   = "ea52bdfd-8af6-4f5a-b182-2b99e554eb33";
+                objInspeccion.InspeccionEstatusName = "POR FINALIZAR";
+            }
+
             objInspeccion.FechaEvaluacion = DateTime.Now;
             objInspeccion.SetUpdated(objUser);
 

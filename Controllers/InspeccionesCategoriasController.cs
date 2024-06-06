@@ -32,7 +32,7 @@ namespace API.Inspecciones.Controllers
             {
                 var idInspeccion = Globals.ParseGuid(Globals.JsonData(data).idInspeccion);
 
-                Inspeccion objModel = await _inspeccionesService.FindSelectorById(idInspeccion, "Folio,UnidadNumeroEconomico,IdUnidadTipo,UnidadTipoName,UnidadMarcaName,NumeroSerie,IdInspeccionTipo,InspeccionTipoName,Locacion,FechaInspeccionInicial,FechaEvaluacion");
+                Inspeccion objModel = await _inspeccionesService.FindSelectorById(idInspeccion, "Folio,UnidadNumeroEconomico,IdUnidadTipo,UnidadTipoName,UnidadMarcaName,NumeroSerie,IdInspeccionTipo,InspeccionTipoName,Locacion,FechaInspeccionInicial,FechaEvaluacion,Evaluado");
 
                 var objInspeccion = new
                 {
@@ -44,6 +44,7 @@ namespace API.Inspecciones.Controllers
                     objModel.InspeccionTipoName,
                     objModel.Locacion,
                     objModel.FechaInspeccionInicial,
+                    objModel.Evaluado,
                 };
 
                 List<dynamic> lstCategorias = new List<dynamic>();
