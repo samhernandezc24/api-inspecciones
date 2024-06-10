@@ -36,7 +36,6 @@ namespace API.Inspecciones.Controllers
                 var lstUnidadesTipos = await HttpReq.Post("unidades", "unidades/tipos/List");
 
                 List<dynamic> lstInspeccionesEstatus        = await _inspeccionesEstatusService.List();
-                List<dynamic> lstUnidadesCapacidadesMedidas = await _unidadesCapacidadesMedidadesService.List();
                 List<dynamic> lstUsuarios                   = await _inspeccionesService.ListUsuarios();
 
                 var dataSourcePersistence = await HttpReq.Post("account", "DataSourcePersistence/find", Globals.TableDataSource("Inspecciones", User));
@@ -46,7 +45,6 @@ namespace API.Inspecciones.Controllers
                     dataSourcePersistence       = dataSourcePersistence,
                     UnidadesTipos               = lstUnidadesTipos,
                     InspeccionesEstatus         = lstInspeccionesEstatus,
-                    UnidadesCapacidadesMedidas  = lstUnidadesCapacidadesMedidas,
                     Usuarios                    = lstUsuarios,
                 };
 
