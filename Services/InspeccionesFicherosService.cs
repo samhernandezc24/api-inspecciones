@@ -3,6 +3,7 @@ using System.Security.Claims;
 using API.Inspecciones.Models;
 using API.Inspecciones.Persistence;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp.PixelFormats;
 using Workcube.Libraries;
 
 namespace API.Inspecciones.Services
@@ -20,31 +21,33 @@ namespace API.Inspecciones.Services
 
         public async Task Create(dynamic data, ClaimsPrincipal user)
         {
-            string fileBase64       = Globals.ToString(data.fileBase64);
-            string fileExtension    = "." + Globals.ToString(data.fileExtension);
-            string filePath         = FileManager.GetNamePath(fileExtension);
-
             var objTransaction = _context.Database.BeginTransaction();
 
-            // GUARDAR FOTOGRAFÍAS DE INSPECCIÓN
-            InspeccionFichero objModel = new InspeccionFichero();
+            foreach (var item in data.lstFicheros)
+            {
+                string fileBase64       = Globals.ToString(item.fileBase64);
+                string fileExtension    = "." + Globals.ToString(item.fileExtension);
+                string filePath         = FileManager.GetNamePath(fileExtension);
 
-            objModel.IdInspeccionFichero    = Guid.NewGuid().ToString();
-            objModel.Path                   = filePath;
-            objModel.IdInspeccion           = Globals.ParseGuid(data.idInspeccion);
-            objModel.InspeccionFolio        = Globals.ToUpper(data.inspeccionFolio);
-            objModel.SetCreated(Globals.GetUser(user));
+                InspeccionFichero objModel = new InspeccionFichero();
 
-            _context.InspeccionesFicheros.Add(objModel);
-            await _context.SaveChangesAsync();
+                objModel.IdInspeccionFichero    = Guid.NewGuid().ToString();
+                objModel.Path                   = filePath;
+                objModel.IdInspeccion           = Globals.ParseGuid(item.idInspeccion);
+                objModel.InspeccionFolio        = Globals.ParseGuid(item.inspeccionFolio);
+                objModel.SetCreated(Globals.GetUser(user));
 
-            string directory = _root.ContentRootPath + "\\Ficheros\\InspeccionesFicheros\\";
+                _context.InspeccionesFicheros.Add(objModel);
+                await _context.SaveChangesAsync();
 
-            if (!FileManager.ValidateExtension(fileExtension)) { throw new AppException(ExceptionMessage.CAST_002); }
+                string directory = _root.ContentRootPath + "\\Ficheros\\InspeccionesFicheros\\";
 
-            FileManager.ValidateDirectory(directory);
+                if (!FileManager.ValidateExtension(fileExtension)) { throw new AppException(ExceptionMessage.CAST_002); }
 
-            await FileManager.SaveFileBase64(fileBase64, directory + objModel.Path);
+                FileManager.ValidateDirectory(directory);
+
+                await FileManager.SaveFileBase64(fileBase64, directory + objModel.Path);
+            }
 
             objTransaction.Commit();
         }
