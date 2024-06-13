@@ -18,36 +18,35 @@ namespace API.Inspecciones.Services
             _context    = context;
             _root       = root;
         }
+         
 
         public async Task Create(dynamic data, ClaimsPrincipal user)
         {
+            string fileBase64       = Globals.ToString(data.fileBase64);
+            string fileExtension    = "." + Globals.ToString(data.fileExtension);
+            string filePath         = FileManager.GetNamePath(fileExtension);
+
             var objTransaction = _context.Database.BeginTransaction();
 
-            foreach (var item in data.lstFicheros)
-            {
-                string fileBase64       = Globals.ToString(item.fileBase64);
-                string fileExtension    = "." + Globals.ToString(item.fileExtension);
-                string filePath         = FileManager.GetNamePath(fileExtension);
+            // GUARDAR EL FICHERO
+            InspeccionFichero objModel = new InspeccionFichero();
 
-                InspeccionFichero objModel = new InspeccionFichero();
+            objModel.IdInspeccionFichero    = Guid.NewGuid().ToString();
+            objModel.Path                   = filePath;
+            objModel.IdInspeccion           = Globals.ParseGuid(data.idInspeccion);
+            objModel.InspeccionFolio        = Globals.ToUpper(data.inspeccionFolio);
+            objModel.SetCreated(Globals.GetUser(user));
 
-                objModel.IdInspeccionFichero    = Guid.NewGuid().ToString();
-                objModel.Path                   = filePath;
-                objModel.IdInspeccion           = Globals.ParseGuid(item.idInspeccion);
-                objModel.InspeccionFolio        = Globals.ParseGuid(item.inspeccionFolio);
-                objModel.SetCreated(Globals.GetUser(user));
+            _context.InspeccionesFicheros.Add(objModel);
+            await _context.SaveChangesAsync();
 
-                _context.InspeccionesFicheros.Add(objModel);
-                await _context.SaveChangesAsync();
+            string directory = _root.ContentRootPath + "\\Ficheros\\InspeccionesFicheros\\";
 
-                string directory = _root.ContentRootPath + "\\Ficheros\\InspeccionesFicheros\\";
+            if (!FileManager.ValidateExtension(fileExtension)) { throw new AppException(ExceptionMessage.CAST_002); }
 
-                if (!FileManager.ValidateExtension(fileExtension)) { throw new AppException(ExceptionMessage.CAST_002); }
+            FileManager.ValidateDirectory(directory);
 
-                FileManager.ValidateDirectory(directory);
-
-                await FileManager.SaveFileBase64(fileBase64, directory + objModel.Path);
-            }
+            await FileManager.SaveFileBase64(fileBase64, directory + objModel.Path);
 
             objTransaction.Commit();
         }
@@ -61,7 +60,7 @@ namespace API.Inspecciones.Services
             // ELIMINAR FOTOGRAFÍA
             InspeccionFichero objModel = await _context.InspeccionesFicheros.FindAsync(idInspeccionFichero);
 
-            if (objModel == null) { throw new ArgumentException("No se ha encontrado la foto solicitada solicitado."); }
+            if (objModel == null) { throw new ArgumentException("No se ha encontrado la foto solicitada."); }
             if (objModel.Deleted) { throw new ArgumentException("La foto ya fue eliminado anteriormente."); }
 
             objModel.Deleted = true;
