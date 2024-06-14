@@ -1,9 +1,7 @@
-﻿using System.Drawing;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using API.Inspecciones.Models;
 using API.Inspecciones.Persistence;
 using Microsoft.EntityFrameworkCore;
-using SixLabors.ImageSharp.PixelFormats;
 using Workcube.Libraries;
 
 namespace API.Inspecciones.Services
