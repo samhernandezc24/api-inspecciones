@@ -109,6 +109,9 @@ namespace API.Inspecciones.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("NoAplica")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Orden")
                         .HasColumnType("int");
 

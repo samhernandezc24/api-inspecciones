@@ -38,12 +38,7 @@ namespace API.Inspecciones.Services
             objInspeccion.FechaInspeccionInicial        = Globals.DateTime(data.fechaInspeccionInicial);
             objInspeccion.FechaInspeccionInicialUpdate  = Globals.DateTime(data.fechaInspeccionInicial);
             objInspeccion.IdUserInspeccionInicial       = objUser.Id;
-            objInspeccion.UserInspeccionInicialName     = objUser.Nombre;
-
-            objInspeccion.FechaInspeccionFinal          = Globals.DateTime(data.fechaInspeccionFinal);
-            objInspeccion.FechaInspeccionFinalUpdate    = Globals.DateTime(data.fechaInspeccionFinal);
-            objInspeccion.IdUserInspeccionFinal         = objUser.Id;
-            objInspeccion.UserInspeccionFinalName       = objUser.Nombre;
+            objInspeccion.UserInspeccionInicialName     = objUser.Nombre;            
 
             if (!isParcial) { objInspeccion.Evaluado = true; }
 
@@ -146,9 +141,8 @@ namespace API.Inspecciones.Services
                                                         FormularioTipoName  = d.FormularioTipoName,
                                                         FormularioValor     = d.FormularioValor,
                                                         Value               = d.Value,
-                                                        NoAplica            = d.NoAplica,
                                                         Observaciones       = d.Observaciones,
-                                                        HasObservaciones    = !string.IsNullOrEmpty(d.Observaciones),
+                                                        NoAplica            = d.NoAplica,
                                                     }).ToList()
                             })
                             .ToListAsync<dynamic>();

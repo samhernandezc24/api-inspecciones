@@ -16,11 +16,13 @@ namespace API.Inspecciones.Services
     {
         private readonly Context _context;
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _root;
 
-        public InspeccionesService(Context context, IMapper mapper)
+        public InspeccionesService(Context context, IMapper mapper, IWebHostEnvironment root)
         {
             _context    = context;
             _mapper     = mapper;
+            _root       = root;
         }
 
         public async Task Cancel(dynamic data, ClaimsPrincipal user)
@@ -304,6 +306,7 @@ namespace API.Inspecciones.Services
 
         public async Task Finish(dynamic data, ClaimsPrincipal user)
         {
+            var objUser = Globals.GetUser(user);
             var objTransaction = _context.Database.BeginTransaction();
 
             string idInspeccion = Globals.ParseGuid(data.idInspeccion);
@@ -318,13 +321,44 @@ namespace API.Inspecciones.Services
                 throw new ArgumentException("La inspección ya fue finalizada o cancelada anteriormente.");
             }
 
+            // FIRMA VERIFICADOR
+            string verificadorFileBase64        = Globals.ToString(data.firmaVerificador);
+            string verificadorFileExtension     = "." + Globals.ToString(data.fileExtensionVerificador);
+            string verificadorFilePath          = FileManager.GetNamePath(verificadorFileExtension);
+
+            // FIRMA OPERADOR
+            string operadorFileBase64           = Globals.ToString(data.firmaOperador);
+            string operadorFileExtension        = "." + Globals.ToString(data.fileExtensionOperador);
+            string operadorFilePath             = FileManager.GetNamePath(operadorFileExtension);
+
             // FINALIZAR INSPECCION
-            objModel.IdInspeccionEstatus    = "ea52bdfd-8af6-4f5a-b182-2b99e554eb33";
+            objModel.FechaInspeccionFinal          = Globals.DateTime(data.fechaInspeccionFinal);
+            objModel.FechaInspeccionFinalUpdate    = Globals.DateTime(data.fechaInspeccionFinal);
+            objModel.IdUserInspeccionFinal         = objUser.Id;
+            objModel.UserInspeccionFinalName       = objUser.Nombre;
+
+            objModel.IdInspeccionEstatus    = "ea52bdfd-8af6-4f5a-b182-2b99e554eb34";
             objModel.InspeccionEstatusName  = "FINALIZADO";
-            objModel.SetUpdated(Globals.GetUser(user));
+            objModel.FirmaVerificador       = verificadorFilePath;
+            objModel.FirmaOperador          = operadorFilePath;
+            objModel.Observaciones          = Globals.ToString(data.observaciones);
+            objModel.SetUpdated(objUser);
 
             _context.Inspecciones.Update(objModel);
             await _context.SaveChangesAsync();
+
+            string verificadorDir   = _root.ContentRootPath + "\\Ficheros\\Inspecciones\\FirmasVerificador\\";
+            string operadorDir      = _root.ContentRootPath + "\\Ficheros\\Inspecciones\\FirmasOperador\\";
+
+            if (!FileManager.ValidateExtension(verificadorFileExtension)) { throw new AppException(ExceptionMessage.CAST_002); }
+            if (!FileManager.ValidateExtension(operadorFileExtension)) { throw new AppException(ExceptionMessage.CAST_002); }
+
+            FileManager.ValidateDirectory(verificadorDir);
+            FileManager.ValidateDirectory(operadorDir);
+
+            await FileManager.SaveFileBase64(verificadorFileBase64, verificadorDir + objModel.FirmaVerificador);
+            await FileManager.SaveFileBase64(operadorFileBase64, operadorDir + objModel.FirmaOperador);
+
             objTransaction.Commit();
         }
 

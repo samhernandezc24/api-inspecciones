@@ -30,4 +30,8 @@
     <PackageReference Include="Workcube.Dependencias" Version="1.0.62" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Ficheros\" />
+  </ItemGroup>
+
 </Project>

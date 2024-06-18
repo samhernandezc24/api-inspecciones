@@ -46,6 +46,7 @@ namespace API.Inspecciones.Services
             objModel.FormularioTipoName     = "Opción múltiple";
             objModel.Orden                  = newOrdenValue;
             objModel.FormularioValor        = "Sí,No";
+            objModel.NoAplica               = false;
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.CategoriasItems.Add(objModel);
@@ -79,6 +80,7 @@ namespace API.Inspecciones.Services
             objModel.FormularioTipoName     = Globals.ToString(data.formularioTipoName);
             objModel.Orden                  = newOrdenValue;
             objModel.FormularioValor        = Globals.ToString(data.formularioValor);
+            objModel.NoAplica = false;
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.CategoriasItems.Add(objModel);

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Inspecciones.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20240506022738_migration0")]
+    [Migration("20240618212704_migration0")]
     partial class migration0
     {
         /// <inheritdoc />
@@ -111,6 +111,9 @@ namespace API.Inspecciones.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("NoAplica")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Orden")
                         .HasColumnType("int");
@@ -402,6 +405,12 @@ namespace API.Inspecciones.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("IdUpdatedUser")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("NoAplica")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Observaciones")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedFecha")

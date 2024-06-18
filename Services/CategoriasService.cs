@@ -146,6 +146,7 @@ namespace API.Inspecciones.Services
                                                                 IdFormularioTipo    = d.IdFormularioTipo,
                                                                 FormularioTipoName  = d.FormularioTipoName,
                                                                 FormularioValor     = d.FormularioValor,
+                                                                NoAplica            = d.NoAplica,
                                                             }).ToList()
                             })
                             .ToListAsync<dynamic>();

@@ -22,6 +22,7 @@ namespace API.Inspecciones.Models
         public int Orden { get; set; }
 
         public string FormularioValor { get; set; }
+        public bool NoAplica {  get; set; }
 
         public virtual List<InspeccionCategoriaValue> InspeccionesCategoriasValues { get; set; }
     }
