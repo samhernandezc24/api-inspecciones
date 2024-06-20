@@ -82,13 +82,13 @@ namespace API.Inspecciones.Services
                     if (objValue != null)
                     {
                         // ACTUALIZAR INSPECCION CATEGORIA VALUE
-                        objValue.CategoriaItemName  = Globals.ToUpper(item.name);
+                        objValue.CategoriaItemName  = Globals.ToString(item.name);
                         objValue.IdFormularioTipo   = Globals.ParseGuid(item.idFormularioTipo);
-                        objValue.FormularioTipoName = Globals.ToUpper(item.formularioTipoName);
+                        objValue.FormularioTipoName = Globals.ToString(item.formularioTipoName);
                         objValue.FormularioValor    = Globals.ToString(item.formularioValor);
                         objValue.Value              = Globals.ToString(item.value);
                         objValue.NoAplica           = Globals.ParseBool(item.noAplica);
-                        objValue.Observaciones      = Globals.ToUpper(item.observaciones);
+                        objValue.Observaciones      = Globals.ToString(item.observaciones);
                         objValue.SetUpdated(objUser);
 
                         _context.InspeccionesCategoriasValues.Update(objValue);
@@ -101,13 +101,13 @@ namespace API.Inspecciones.Services
                         objValue.IdInspeccionCategoriaValue     = Guid.NewGuid().ToString();
                         objValue.IdInspeccionCategoria          = objCategoria.IdInspeccionCategoria;
                         objValue.IdCategoriaItem                = Globals.ParseGuid(item.idCategoriaItem);
-                        objValue.CategoriaItemName              = Globals.ToUpper(item.name);
+                        objValue.CategoriaItemName              = Globals.ToString(item.name);
                         objValue.IdFormularioTipo               = Globals.ParseGuid(item.idFormularioTipo);
-                        objValue.FormularioTipoName             = Globals.ToUpper(item.formularioTipoName);
+                        objValue.FormularioTipoName             = Globals.ToString(item.formularioTipoName);
                         objValue.FormularioValor                = Globals.ToString(item.formularioValor);
                         objValue.Value                          = Globals.ToString(item.value);
                         objValue.NoAplica                       = Globals.ParseBool(item.noAplica);
-                        objValue.Observaciones                  = Globals.ToUpper(item.observaciones);
+                        objValue.Observaciones                  = Globals.ToString(item.observaciones);
                         objValue.SetCreated(objUser);
 
                         _context.InspeccionesCategoriasValues.Add(objValue);
@@ -131,6 +131,7 @@ namespace API.Inspecciones.Services
                             {
                                 IdCategoria     = x.IdCategoria,
                                 Name            = x.CategoriaName,
+                                TotalItems      = x.InspeccionesCategoriasValues.Where(d => d.IdFormularioTipo == "ea52bdfd-8af6-4f5a-b182-2b99e554eb32").Count(),
                                 CategoriasItems = x.InspeccionesCategoriasValues
                                                     .OrderBy(d => d.CreatedFecha)
                                                     .Select(d => new

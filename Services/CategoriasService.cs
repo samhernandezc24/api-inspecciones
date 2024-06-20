@@ -137,6 +137,7 @@ namespace API.Inspecciones.Services
                             {
                                 IdCategoria             = x.IdCategoria,
                                 Name                    = x.Name,
+                                TotalItems              = x.CategoriasItems.Where(d => !d.Deleted && d.IdFormularioTipo == "ea52bdfd-8af6-4f5a-b182-2b99e554eb32").Count(),
                                 CategoriasItems         = x.CategoriasItems.Where(d => !d.Deleted)
                                                             .OrderBy(x => x.Orden)
                                                             .Select(d => new
