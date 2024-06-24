@@ -305,5 +305,31 @@ namespace API.Inspecciones.Controllers
 
             return objReturn.build();
         }
+
+        [HttpPost("Predictive")]
+        [Authorize]
+        public async Task<ActionResult<dynamic>> Predictive(JsonObject data)
+        {
+            JsonReturn objReturn = new JsonReturn();
+
+            try
+            {
+                List<dynamic> lstRows = await _unidadesService.Predictive(Globals.JsonData(data));
+
+                objReturn.Result = new { rows = lstRows };
+
+                objReturn.Success(SuccessMessage.REQUEST);
+            }
+            catch (AppException ex)
+            {
+                objReturn.Exception(ex);
+            }
+            catch (Exception ex)
+            {
+                objReturn.Exception(ExceptionMessage.RawException(ex));
+            }
+
+            return objReturn.build();            
+        }
     }
 }

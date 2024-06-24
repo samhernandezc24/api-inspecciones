@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Numerics;
 using System.Security.Claims;
 using API.Inspecciones.Models;
 using API.Inspecciones.Persistence;
@@ -267,6 +268,64 @@ namespace API.Inspecciones.Services
             var lstRows = _mapper.Map<List<RepUnidad>>(lstDataSource);
 
             return await ExcelManager<RepUnidad>.GetFile(columnsDataTable, lstRows);
+        }
+
+        public async Task<List<dynamic>> Predictive(dynamic data)
+        {
+            // INCLUDES
+            string fields = "IdUnidad,NumeroEconomico,NumeroSerie,IdBase,BaseName,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa, Modelo,AnioEquipo,Capacidad,IdUnidadCapacidadMedida,UnidadCapacidadMedidaName,Odometro,Horometro";
+
+            // QUERY
+            var lstItems = _context.Unidades
+                                    .AsNoTracking()
+                                    .Where(x => !x.Deleted)
+                                    .OrderBy(x => x.NumeroEconomico)
+                                    .Select(Globals.BuildSelector<Unidad, Unidad>(fields));
+
+            // INITIALIZATION
+            DataSourceBuilder<Unidad> objDataSourceBuilder = new DataSourceBuilder<Unidad>();
+            objDataSourceBuilder.Source     = lstItems;
+            objDataSourceBuilder.Arguments  = data;
+
+            // SEARCH FILTERS
+            Func<Expression<Func<Unidad, bool>>, string, string, Expression<Func<Unidad, bool>>> argSwitchFilters = (argExpression, argField, search) => { return argExpression; };
+
+            lstItems = objDataSourceBuilder.SearchFilters(argSwitchFilters);
+
+            // TAKE
+            lstItems = objDataSourceBuilder.Take();
+
+            // DATA MAPPING
+            var lstOriginal = await lstItems.ToListAsync();
+            var lstRows     = new List<dynamic>();
+
+            lstOriginal.ForEach((item) =>
+            {
+                lstRows.Add(new
+                {
+                    IdUnidad                    = item.IdUnidad,
+                    NumeroEconomico             = item.NumeroEconomico,
+                    NumeroSerie                 = item.NumeroSerie,
+                    IdBase                      = item.IdBase,
+                    BaseName                    = item.BaseName,
+                    IdUnidadTipo                = item.IdUnidadTipo,
+                    UnidadTipoName              = item.UnidadTipoName,
+                    IdUnidadMarca               = item.IdUnidadMarca,
+                    UnidadMarcaName             = item.UnidadMarcaName,
+                    IdUnidadPlacaTipo           = item.IdUnidadPlacaTipo,
+                    UnidadPlacaTipoName         = item.UnidadPlacaTipoName,
+                    Placa                       = item.Placa,
+                    Modelo                      = item.Modelo,
+                    AnioEquipo                  = item.AnioEquipo,
+                    Capacidad                   = item.Capacidad.ToString(),
+                    IdUnidadCapacidadMedida     = item.IdUnidadCapacidadMedida,
+                    UnidadCapacidadMedidaName   = item.UnidadCapacidadMedidaName,
+                    Odometro                    = item.Odometro.ToString(),
+                    Horometro                   = item.Horometro.ToString(),
+                });
+            });
+
+            return lstRows;
         }
 
         public async Task Update(dynamic data, ClaimsPrincipal user)
