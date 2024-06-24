@@ -3,6 +3,7 @@ using API.Inspecciones.Services;
 using API.Inspecciones.Utils;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using System.Globalization;
 using Workcube.JwtAutentication;
 
@@ -41,6 +42,12 @@ var mapperConfig = new MapperConfiguration(m =>
 });
 
 var app = builder.Build();
+
+app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions()
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Ficheros")), RequestPath = new PathString("/Ficheros")
+});
 
 // Configurar el lenguaje predeterminado para el manejo de formatos de fecha, etc.
 var cultureInfo = new CultureInfo("es-MX");
