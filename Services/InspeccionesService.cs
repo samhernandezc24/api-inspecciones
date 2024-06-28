@@ -55,6 +55,13 @@ namespace API.Inspecciones.Services
         {
             var objTransaction = _context.Database.BeginTransaction();
 
+            string idUnidad = Globals.ParseGuid(data.idUnidad);
+
+            var inspeccionUnidadExist = _context.Inspecciones.FirstOrDefaultAsync(x => x.IdUnidad == idUnidad && 
+                (x.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb31" || x.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb32") && 
+                !x.Deleted);
+            if (inspeccionUnidadExist != null) { throw new ArgumentException("No se puede crear la inspección debido a que ya existe una en curso para esta unidad."); }
+
             // GUARDAR INSPECCION
             Inspeccion objModel = new Inspeccion();
 
@@ -67,7 +74,7 @@ namespace API.Inspecciones.Services
             objModel.InspeccionTipoName         = Globals.ToUpper(data.inspeccionTipoName);
             objModel.IdBase                     = Globals.ParseGuid(data.idBase);
             objModel.BaseName                   = Globals.ToUpper(data.baseName);
-            objModel.IdUnidad                   = Globals.ParseGuid(data.idUnidad);
+            objModel.IdUnidad                   = idUnidad;
             objModel.UnidadNumeroEconomico      = Globals.ToUpper(data.unidadNumeroEconomico);
             objModel.IsUnidadTemporal           = Globals.ParseBool(data.isUnidadTemporal);
             objModel.IdUnidadTipo               = Globals.ParseGuid(data.idUnidadTipo);
