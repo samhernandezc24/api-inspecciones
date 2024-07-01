@@ -29,17 +29,17 @@ namespace API.Inspecciones.Controllers
 
             try
             {
-                var lstUnidadesMarcas   = await HttpReq.Post("unidades", "unidadesMarcas/List");
-                var lstUnidadesTipos    = await HttpReq.Post("unidades", "unidades/tipos/List");
+                var lstUnidadesTipos        = await HttpReq.Post("unidades", "unidades/tipos/List");
+                var lstUnidadesMarcas       = await HttpReq.Post("unidades", "unidadesMarcas/List");
+                List<dynamic> lstUsuarios   = await _unidadesService.ListUsuarios();
 
-                List<dynamic> lstUnidadesCapacidadesMedidas = await _unidadesCapacidadesMedidadesService.List();
-                List<dynamic> lstUsuarios                   = await _unidadesService.ListUsuarios();
+                var dataSourcePersistence = await HttpReq.Post("account", "DataSourcePersistence/find", Globals.TableDataSource("Unidades", User));
 
                 objReturn.Result = new
                 {
-                    UnidadesCapacidadesMedidas  = lstUnidadesCapacidadesMedidas,
-                    UnidadesMarcas              = lstUnidadesMarcas,
+                    dataSourcePersistence       = dataSourcePersistence,
                     UnidadesTipos               = lstUnidadesTipos,
+                    UnidadesMarcas              = lstUnidadesMarcas,
                     Usuarios                    = lstUsuarios,
                 };
 
@@ -129,35 +129,6 @@ namespace API.Inspecciones.Controllers
 
                 objReturn.Title     = "Nueva unidad";
                 objReturn.Message   = "La unidad se ha creado exitosamente";
-            }
-            catch (AppException ex)
-            {
-                objReturn.Exception(ex);
-            }
-            catch (Exception ex)
-            {
-                objReturn.Exception(ExceptionMessage.RawException(ex));
-            }
-
-            return objReturn.build();
-        }
-
-        [HttpPost("List")]
-        [Authorize]
-        public async Task<ActionResult<dynamic>> List()
-        {
-            JsonReturn objReturn = new JsonReturn();
-
-            try
-            {
-                List<dynamic> lstUnidades = await _unidadesService.List();
-
-                objReturn.Result = new
-                {
-                    unidades = lstUnidades,
-                };
-
-                objReturn.Success(SuccessMessage.REQUEST);
             }
             catch (AppException ex)
             {

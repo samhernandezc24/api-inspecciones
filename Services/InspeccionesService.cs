@@ -86,8 +86,8 @@ namespace API.Inspecciones.Services
             objModel.Evaluado                   = false;
             objModel.Locacion                   = Globals.ToUpper(data.locacion);
             objModel.TipoPlataforma             = Globals.ToUpper(data.tipoPlataforma);
-            objModel.Odometro                   = Globals.ParseInt(data.odometro)   ?? 0;
-            objModel.Horometro                  = Globals.ParseInt(data.horometro)  ?? 0;
+            objModel.Odometro                   = Globals.ParseInt(data.odometro);
+            objModel.Horometro                  = Globals.ParseInt(data.horometro);
 
             NextFolio(ref objModel);
             objModel.SetCreated(Globals.GetUser(user));

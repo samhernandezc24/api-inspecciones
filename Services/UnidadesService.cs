@@ -32,7 +32,6 @@ namespace API.Inspecciones.Services
             string numeroEconomico = Globals.ToUpper(data.numeroEconomico);
 
             bool findUnidad = await _context.Unidades.AnyAsync(x => x.NumeroEconomico.ToUpper() == numeroEconomico && !x.Deleted);
-
             if (findUnidad) { throw new ArgumentException("Ya existe una unidad con ese número ecónomico."); }
 
             // GUARDAR UNIDAD
@@ -56,8 +55,8 @@ namespace API.Inspecciones.Services
             objModel.Capacidad                  = Globals.ParseDecimal(data.capacidad);
             objModel.IdUnidadCapacidadMedida    = Globals.ParseGuid(data.idUnidadCapacidadMedida);
             objModel.UnidadCapacidadMedidaName  = Globals.ToUpper(data.unidadCapacidadMedidaName);
-            objModel.Horometro                  = Globals.ParseInt(data.horometro)  ?? 0;
-            objModel.Odometro                   = Globals.ParseInt(data.odometro)   ?? 0;
+            objModel.Horometro                  = Globals.ParseInt(data.horometro);
+            objModel.Odometro                   = Globals.ParseInt(data.odometro);
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.Unidades.Add(objModel);
@@ -86,13 +85,9 @@ namespace API.Inspecciones.Services
                     index                           = index,
                     IdUnidad                        = item.IdUnidad,
                     NumeroEconomico                 = item.NumeroEconomico,
-                    IdBase                          = item.IdBase,
                     BaseName                        = item.BaseName,
-                    IdUnidadTipo                    = item.IdUnidadTipo,
                     UnidadTipoName                  = item.UnidadTipoName,
-                    IdUnidadMarca                   = item.IdUnidadMarca,
                     UnidadMarcaName                 = item.UnidadMarcaName,
-                    IdUnidadPlacaTipo               = item.IdUnidadPlacaTipo,
                     UnidadPlacaTipoName             = item.UnidadPlacaTipoName,
                     Placa                           = item.Placa,
                     NumeroSerie                     = item.NumeroSerie,
@@ -100,7 +95,6 @@ namespace API.Inspecciones.Services
                     AnioEquipo                      = item.AnioEquipo,
                     Descripcion                     = item.Descripcion,
                     Capacidad                       = item.Capacidad,
-                    IdUnidadCapacidadMedida         = item.IdUnidadCapacidadMedida,
                     UnidadCapacidadMedidaName       = item.UnidadCapacidadMedidaName,
                     Odometro                        = item.Odometro,
                     Horometro                       = item.Horometro,
@@ -133,8 +127,8 @@ namespace API.Inspecciones.Services
             // FILTROS
             var filters = new Dictionary<string, Func<string, Expression<Func<Unidad, bool>>>>
             {
-                {"IdUnidadMarca",       (strValue) => item => item.IdUnidadMarca    == strValue},
                 {"IdUnidadTipo",        (strValue) => item => item.IdUnidadTipo     == strValue},
+                {"IdUnidadMarca",       (strValue) => item => item.IdUnidadMarca    == strValue},
                 {"IdCreatedUser",       (strValue) => item => item.IdCreatedUser    == strValue},
                 {"IdUpdatedUser",       (strValue) => item => item.IdUpdatedUser    == strValue},
             };
@@ -154,10 +148,25 @@ namespace API.Inspecciones.Services
 
             Expression<Func<Unidad, bool>> ExpFullWhere = SourceExpression<Unidad>.GetExpression(data, filters, dates, filtersMultiple);
 
+            // ORDER BY
+            var orderColumn     = Globals.ToString(data.sort.column);
+            var orderDirection  = Globals.ToString(data.sort.direction);
+
+            Expression<Func<Unidad, object>> sortExpression;
+
+            switch (orderColumn)
+            {
+                case "numeroEconomico"          : sortExpression = (x => x.NumeroEconomico);        break;
+                case "createdFechaNatural"      : sortExpression = (x => x.CreatedFecha);           break;
+                default                         : sortExpression = (x => x.CreatedFecha);           break;
+            }
+
             // COMPLETE
             IQueryable<Unidad> rows = _context.Unidades.AsNoTracking();
 
-            string fields = "IdUnidad,NumeroEconomico,IdBase,BaseName,IdUnidadTipo,UnidadTipoName,IdUnidadMarca,UnidadMarcaName,IdUnidadPlacaTipo,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,AnioEquipo,Descripcion,Capacidad,IdUnidadCapacidadMedida,UnidadCapacidadMedidaName,Odometro,Horometro,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
+            rows = (orderDirection == "asc") ? rows.OrderBy(sortExpression) : rows.OrderByDescending(sortExpression);
+
+            string fields = "IdUnidad,NumeroEconomico,BaseName,UnidadTipoName,UnidadMarcaName,UnidadPlacaTipoName,Placa,NumeroSerie,Modelo,AnioEquipo,Descripcion,Capacidad,UnidadCapacidadMedidaName,Odometro,Horometro,CreatedUserName,CreatedFecha,UpdatedUserName,UpdatedFecha";
 
             lstItems = rows
                          .Where(x => !x.Deleted)
@@ -196,39 +205,12 @@ namespace API.Inspecciones.Services
 
         public async Task<Unidad> FindSelectorById(string id, string fields)
         {
-            return await _context.Unidades.Where(x => x.IdUnidad == id).Select(Globals.BuildSelector<Unidad, Unidad>(fields)).FirstOrDefaultAsync();
+            return await _context.Unidades.AsNoTracking().Where(x => x.IdUnidad == id).Select(Globals.BuildSelector<Unidad, Unidad>(fields)).FirstOrDefaultAsync();
         }
 
-        public async Task<List<dynamic>> List()
+        public Task<List<dynamic>> List()
         {
-            return await _context.Unidades
-                            .AsNoTracking()
-                            .Where(x => !x.Deleted)
-                            .OrderBy(x => x.NumeroEconomico)
-                            .Select(x => new
-                            {
-                                IdUnidad                    = x.IdUnidad,
-                                NumeroEconomico             = x.NumeroEconomico,
-                                IdBase                      = x.IdBase,
-                                BaseName                    = x.BaseName,
-                                IdUnidadTipo                = x.IdUnidadTipo,
-                                UnidadTipoName              = x.UnidadTipoName,
-                                IdUnidadMarca               = x.IdUnidadMarca,
-                                UnidadMarcaName             = x.UnidadMarcaName,
-                                IdUnidadPlacaTipo           = x.IdUnidadPlacaTipo,
-                                UnidadPlacaTipoName         = x.UnidadPlacaTipoName,
-                                Placa                       = x.Placa,
-                                NumeroSerie                 = x.NumeroSerie,
-                                Modelo                      = x.Modelo,
-                                AnioEquipo                  = x.AnioEquipo,
-                                Capacidad                   = x.Capacidad.ToString(),
-                                IdUnidadCapacidadMedida     = x.IdUnidadCapacidadMedida,
-                                UnidadCapacidadMedidaName   = x.UnidadCapacidadMedidaName,
-                                Odometro                    = x.Odometro.ToString(),
-                                Horometro                   = x.Horometro.ToString(),
-                                value                       = string.Format("No. Económico: {0}", x.NumeroEconomico),
-                            })
-                            .ToListAsync<dynamic>();
+            throw new NotImplementedException();
         }
 
         public async Task<List<dynamic>> ListUsuarios()
@@ -262,8 +244,10 @@ namespace API.Inspecciones.Services
         {
             IQueryable<UnidadViewModel> lstDataSource = DataSourceExpression(data);
 
-            List<ModelExcelColumn> columnsDataTable = new List<ModelExcelColumn>();
-            columnsDataTable.Add(new ModelExcelColumn());
+            List<ModelExcelColumn> columnsDataTable = new List<ModelExcelColumn>
+            {
+                new ModelExcelColumn()
+            };
 
             var lstRows = _mapper.Map<List<RepUnidad>>(lstDataSource);
 
@@ -368,13 +352,13 @@ namespace API.Inspecciones.Services
             objModel.Capacidad                  = Globals.ParseDecimal(data.capacidad);
             objModel.IdUnidadCapacidadMedida    = Globals.ParseGuid(data.idUnidadCapacidadMedida);
             objModel.UnidadCapacidadMedidaName  = Globals.ToUpper(data.unidadCapacidadMedidaName);
-            objModel.Horometro                  = Globals.ParseInt(data.horometro)  ?? 0;
-            objModel.Odometro                   = Globals.ParseInt(data.odometro)   ?? 0;
+            objModel.Horometro                  = Globals.ParseInt(data.horometro);
+            objModel.Odometro                   = Globals.ParseInt(data.odometro);
             objModel.SetUpdated(Globals.GetUser(user));
 
             _context.Unidades.Update(objModel);
             await _context.SaveChangesAsync();
             objTransaction.Commit();
-        }
+        }        
     }
 }
