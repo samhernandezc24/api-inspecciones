@@ -53,7 +53,6 @@ namespace API.Inspecciones.Migrations
                     Codigo = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Orden = table.Column<int>(type: "int", nullable: false),
                     IdCreatedUser = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedUserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedFecha = table.Column<DateTime>(type: "datetime2", nullable: false),

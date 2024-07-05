@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Inspecciones.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20240618212704_migration0")]
+    [Migration("20240705011536_migration0")]
     partial class migration0
     {
         /// <inheritdoc />
@@ -522,9 +522,6 @@ namespace API.Inspecciones.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Orden")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedFecha")
                         .HasColumnType("datetime2");

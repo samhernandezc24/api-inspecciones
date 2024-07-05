@@ -24,9 +24,6 @@ namespace API.Inspecciones.Services
             string name         = Globals.ToUpper(data.name);
             string displayName  = Globals.ToUpper($"Check List {data.name}");
 
-            int lastOrdenValue  = await _context.InspeccionesTipos.MaxAsync(x => (int?)x.Orden) ?? 0;
-            int newOrdenValue   = lastOrdenValue + 1;
-
             bool findCodigo     = await _context.InspeccionesTipos.AnyAsync(x => x.Codigo.ToUpper() == codigo && !x.Deleted);
             bool findName       = await _context.InspeccionesTipos.AnyAsync(x => x.Name.ToUpper() == name && !x.Deleted);
 
@@ -40,7 +37,6 @@ namespace API.Inspecciones.Services
             objModel.Codigo             = codigo;
             objModel.Name               = name;
             objModel.DisplayName        = displayName;
-            objModel.Orden              = newOrdenValue;
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.InspeccionesTipos.Add(objModel);
@@ -67,19 +63,7 @@ namespace API.Inspecciones.Services
 
             // ELIMINAR TIPO DE INSPECCION
             objModel.Deleted = true;
-            objModel.Orden = 0;
             objModel.SetUpdated(Globals.GetUser(user));
-
-            _context.SaveChanges();
-
-            var lstInspeccionesTipos = _context.InspeccionesTipos.OrderBy(x => x.Orden).Where(x => !x.Deleted).ToList();
-
-            int orden = 1;
-            foreach (var item in lstInspeccionesTipos)
-            {
-                item.Orden = orden;
-                orden++;
-            }
 
             _context.InspeccionesTipos.Update(objModel);
             await _context.SaveChangesAsync();
@@ -102,13 +86,12 @@ namespace API.Inspecciones.Services
             return await _context.InspeccionesTipos
                             .AsNoTracking()
                             .Where(x => !x.Deleted)
-                            .OrderBy(x => x.Orden)
+                            .OrderBy(x => x.Name)
                             .Select(x => new
                             {
                                 IdInspeccionTipo    = x.IdInspeccionTipo,
                                 Codigo              = x.Codigo,
                                 Name                = x.Name,
-                                Orden               = x.Orden,
                             })
                             .ToListAsync<dynamic>();
         }

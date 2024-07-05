@@ -520,9 +520,6 @@ namespace API.Inspecciones.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Orden")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UpdatedFecha")
                         .HasColumnType("datetime2");
 

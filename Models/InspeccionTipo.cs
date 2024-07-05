@@ -11,7 +11,6 @@ namespace API.Inspecciones.Models
         public string Codigo { get; set; }
         public string Name { get; set; }
         public string DisplayName { get; set; }
-        public int Orden { get; set; }
 
         public virtual List<Categoria> Categorias { get; set; }
         public virtual List<Inspeccion> Inspecciones { get; set; }
