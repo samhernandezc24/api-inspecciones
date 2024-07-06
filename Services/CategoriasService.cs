@@ -33,9 +33,6 @@ namespace API.Inspecciones.Services
                                         .OrderBy(x => x.Orden)
                                         .ToListAsync();
 
-            // Determinar el nuevo valor de orden para la nueva categoría.
-            int newOrdenValue = lstCategorias.Count > 0 ? lstCategorias.Max(x => x.Orden) + 1 : 1;
-
             if (lstCategorias.Any(x => x.Name.ToUpper() == name)) { throw new ArgumentException("Ya existe una categoría con ese nombre."); }
 
             // GUARDAR CATEGORIA
@@ -46,7 +43,7 @@ namespace API.Inspecciones.Services
             objModel.IdInspeccionTipo       = idInspeccionTipo;
             objModel.InspeccionTipoCodigo   = Globals.ToUpper(data.inspeccionTipoCodigo);
             objModel.InspeccionTipoName     = Globals.ToUpper(data.inspeccionTipoName);
-            objModel.Orden                  = newOrdenValue;
+            objModel.Orden                  = Globals.ParseInt(data.orden);
             objModel.SetCreated(Globals.GetUser(user));
 
             _context.Categorias.Add(objModel);

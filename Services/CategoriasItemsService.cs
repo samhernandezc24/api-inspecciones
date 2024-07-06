@@ -32,9 +32,6 @@ namespace API.Inspecciones.Services
                                         .OrderBy(x => x.Orden)
                                         .ToListAsync();
 
-            // Determinar el nuevo valor de orden para la nueva pregunta.
-            int newOrdenValue = lstCategoriasItems.Count > 0 ? lstCategoriasItems.Max(x => x.Orden) + 1 : 1;
-
             // GUARDAR CATEGORIA ITEM
             CategoriaItem objModel = new CategoriaItem();
 
@@ -44,7 +41,7 @@ namespace API.Inspecciones.Services
             objModel.CategoriaName          = Globals.ToUpper(data.categoriaName);
             objModel.IdFormularioTipo       = "ea52bdfd-8af6-4f5a-b182-2b99e554eb32";
             objModel.FormularioTipoName     = "Opción múltiple";
-            objModel.Orden                  = newOrdenValue;
+            objModel.Orden                  = Globals.ParseInt(data.orden);
             objModel.FormularioValor        = "Sí,No";
             objModel.NoAplica               = false;
             objModel.SetCreated(Globals.GetUser(user));
@@ -66,9 +63,6 @@ namespace API.Inspecciones.Services
                                         .OrderBy(x => x.Orden)
                                         .ToListAsync();
 
-            // Determinar el nuevo valor de orden para la nueva pregunta.
-            int newOrdenValue = lstCategoriasItems.Count > 0 ? lstCategoriasItems.Max(x => x.Orden) + 1 : 1;
-
             // DUPLICAR CATEGORIA ITEM
             CategoriaItem objModel = new CategoriaItem();
 
@@ -78,7 +72,7 @@ namespace API.Inspecciones.Services
             objModel.CategoriaName          = Globals.ToUpper(data.categoriaName);
             objModel.IdFormularioTipo       = Globals.ParseGuid(data.idFormularioTipo);
             objModel.FormularioTipoName     = Globals.ToString(data.formularioTipoName);
-            objModel.Orden                  = newOrdenValue;
+            objModel.Orden                  = Globals.ParseInt(data.orden);
             objModel.FormularioValor        = Globals.ToString(data.formularioValor);
             objModel.NoAplica = false;
             objModel.SetCreated(Globals.GetUser(user));
