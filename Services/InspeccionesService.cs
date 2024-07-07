@@ -55,6 +55,17 @@ namespace API.Inspecciones.Services
         {
             var objTransaction = _context.Database.BeginTransaction();
 
+            string idUnidad = Globals.ParseGuid(data.idUnidad);
+                
+            var existInspeccion = await _context.Inspecciones
+                                    .AsNoTracking()
+                                    .Where(x => x.IdUnidad == idUnidad && 
+                                                (x.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb31" || x.IdInspeccionEstatus == "ea52bdfd-8af6-4f5a-b182-2b99e554eb32") && 
+                                           !x.Deleted)
+                                    .FirstOrDefaultAsync();
+
+            if (existInspeccion != null) { throw new ArgumentException("Ya existe una inspección en curso para la unidad solicitada."); }
+
             // GUARDAR INSPECCION
             Inspeccion objModel = new Inspeccion();
 
