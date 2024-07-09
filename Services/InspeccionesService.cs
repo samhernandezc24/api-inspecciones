@@ -356,20 +356,16 @@ namespace API.Inspecciones.Services
             objModel.SetUpdated(objUser);
 
             _context.Inspecciones.Update(objModel);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();            
 
-            string verificadorDir   = _root.ContentRootPath + "\\Ficheros\\Inspecciones\\FirmasVerificador\\";
-            string operadorDir      = _root.ContentRootPath + "\\Ficheros\\Inspecciones\\FirmasOperador\\";
-
+            // GUARDAR FIRMAS
             if (!FileManager.ValidateExtension(verificadorFileExtension)) { throw new AppException(ExceptionMessage.CAST_002); }
             if (!FileManager.ValidateExtension(operadorFileExtension)) { throw new AppException(ExceptionMessage.CAST_002); }
 
-            FileManager.ValidateDirectory(verificadorDir);
-            FileManager.ValidateDirectory(operadorDir);
+            await HttpReq.SaveFile("\\Ficheros\\Mobile\\Inspecciones\\FirmasVerificador\\", operadorFilePath, operadorFileBase64);
+            await HttpReq.SaveFile("\\Ficheros\\Mobile\\Inspecciones\\FirmasOperador\\", verificadorFilePath, verificadorFileBase64);
 
-            await FileManager.SaveFileBase64(verificadorFileBase64, verificadorDir + objModel.FirmaVerificador);
-            await FileManager.SaveFileBase64(operadorFileBase64, operadorDir + objModel.FirmaOperador);
-
+            // GUARDAR BASE DE DATOS
             objTransaction.Commit();
         }
 

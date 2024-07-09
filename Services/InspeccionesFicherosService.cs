@@ -16,17 +16,16 @@ namespace API.Inspecciones.Services
             _context    = context;
             _root       = root;
         }
-         
+
 
         public async Task Create(dynamic data, ClaimsPrincipal user)
         {
-            string fileBase64       = Globals.ToString(data.fileBase64);
-            string fileExtension    = "." + Globals.ToString(data.fileExtension);
-            string filePath         = FileManager.GetNamePath(fileExtension);
+            string fileBase64 = Globals.ToString(data.fileBase64);
+            string fileExtension = "." + Globals.ToString(data.fileExtension);
+            string filePath = FileManager.GetNamePath(fileExtension);
 
             var objTransaction = _context.Database.BeginTransaction();
 
-            // GUARDAR EL FICHERO
             InspeccionFichero objModel = new InspeccionFichero();
 
             objModel.IdInspeccionFichero    = Guid.NewGuid().ToString();
@@ -38,14 +37,11 @@ namespace API.Inspecciones.Services
             _context.InspeccionesFicheros.Add(objModel);
             await _context.SaveChangesAsync();
 
-            string directory = _root.ContentRootPath + "\\Ficheros\\InspeccionesFicheros\\";
-
+            // GUARDAR FICHERO
             if (!FileManager.ValidateExtension(fileExtension)) { throw new AppException(ExceptionMessage.CAST_002); }
+            await HttpReq.SaveFile("\\Ficheros\\Mobile\\Inspecciones\\", filePath, fileBase64);
 
-            FileManager.ValidateDirectory(directory);
-
-            await FileManager.SaveFileBase64(fileBase64, directory + objModel.Path);
-
+            // GUARDAR BASE DE DATOS
             objTransaction.Commit();
         }
 
