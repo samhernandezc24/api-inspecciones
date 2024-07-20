@@ -64,6 +64,36 @@ namespace API.Inspecciones.Services
             objTransaction.Commit();
         }
 
+        public async Task CreateFromRequerimientos(dynamic data, ClaimsPrincipal user)
+        {
+            var objTransaction = _context.Database.BeginTransaction();
+
+            string numeroEconomico = Globals.ToUpper(data.numeroEconomico);
+
+            bool findUnidad = await _context.Unidades.AnyAsync(x => x.NumeroEconomico.ToUpper() == numeroEconomico && !x.Deleted);
+            if (findUnidad) { throw new ArgumentException("Ya existe una unidad con ese número ecónomico."); }
+
+            // GUARDAR UNIDAD
+            Unidad objModel = new Unidad();
+
+            objModel.IdUnidad                   = Guid.NewGuid().ToString();
+            objModel.NumeroEconomico            = numeroEconomico;            
+            objModel.IdUnidadTipo               = Globals.ParseGuid(data.idUnidadTipo);
+            objModel.UnidadTipoName             = Globals.ToUpper(data.unidadTipoName);
+            objModel.IdUnidadMarca              = Globals.ParseGuid(data.idUnidadMarca ?? "");
+            objModel.UnidadMarcaName            = Globals.ToUpper(data.unidadMarcaName ?? "");            
+            objModel.NumeroSerie                = Globals.ToUpper(data.numeroSerie ?? "");
+            objModel.Modelo                     = Globals.ToUpper(data.modelo ?? "");
+            objModel.AnioEquipo                 = Globals.ToUpper(data.anioEquipo ?? "");
+            objModel.Descripcion                = Globals.ToUpper(data.descripcion ?? "");
+            objModel.Capacidad                  = Globals.ParseDecimal(data.capacidad);
+            objModel.SetCreated(Globals.GetUser(user));
+
+            _context.Unidades.Add(objModel);
+            await _context.SaveChangesAsync();
+            objTransaction.Commit();
+        }
+
         public async Task<dynamic> DataSource(dynamic data, ClaimsPrincipal user)
         {
             IQueryable<UnidadViewModel> lstItems = DataSourceExpression(data);

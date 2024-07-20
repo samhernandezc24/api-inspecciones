@@ -142,6 +142,31 @@ namespace API.Inspecciones.Controllers
             return objReturn.build();
         }
 
+        [HttpPost("Store/Externo")]
+        [Authorize]
+        public async Task<ActionResult<dynamic>> StoreExterno(JsonObject data)
+        {
+            JsonReturn objReturn = new JsonReturn();
+
+            try
+            {
+                await _unidadesService.CreateFromRequerimientos(Globals.JsonData(data), User);
+
+                objReturn.Title     = "Nueva unidad";
+                objReturn.Message   = "La unidad se ha creado exitosamente";
+            }
+            catch (AppException ex)
+            {
+                objReturn.Exception(ex);
+            }
+            catch (Exception ex)
+            {
+                objReturn.Exception(ExceptionMessage.RawException(ex));
+            }
+
+            return objReturn.build();
+        }
+
         [HttpPost("Edit")]
         [Authorize]
         public async Task<ActionResult<dynamic>> Edit(JsonObject data)
